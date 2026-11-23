@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <script>
+  (() => {try {const theme=localStorage.getItem('perp-theme');if(theme==='light'||theme==='dark') document.querySelector('meta[name="color-scheme"]').content=theme;} catch {}})();
+  </script>
+  <title>@@TITLE@@</title>
+  <style>@@CSS@@</style>
+</head>
+<body>
+  <a class="skip-link" href="#explore-heading">Skip to recovered records</a>
+  <header class="page-header shell">
+    <div class="header-top"><p class="eyebrow">perp / v@@VERSION@@ <span class="badge">Offline report</span></p>
+      <label class="theme-control" id="theme-container" for="theme" hidden>Theme
+        <select id="theme"><option value="system" id="system-theme">System</option><option value="light">Light</option><option value="dark">Dark</option></select>
+      </label>
+    </div>
+    <pre class="brand-logo" aria-hidden="true">@@LOGO@@</pre>
+    <h1>@@PRODUCT_NAME@@</h1>
+    <p class="lede">See the patterns in your recovered passwords.</p>
+    <p class="report-meta"><time datetime="@@CREATED@@">@@CREATED@@</time> · @@SOURCE_COUNT@@ input file(s)</p>
+    <nav class="downloads" aria-label="Report downloads">
+      @@EXCEL_LINK@@
+      <a href="passwords.csv" download>Detailed CSV</a><a href="masks.csv" download>Mask frequencies</a>
+      <a href="HashcatMasks.hcmask" download>Hashcat masks</a><a href="summary.json" download>Summary JSON</a>
+    </nav>
+  </header>
+  <main class="shell" data-report-revision="3">
+    <dl class="metrics">@@METRICS@@</dl>
+    <p class="note scope-note">Counts describe recovered input records, including repeats. They are not an account crack rate or a password strength estimate.</p>
+    <div class="grid">@@CHARTS@@</div>
+    <section class="card wide">
+      <div class="section-heading"><div><p class="eyebrow">Record explorer</p><h2 id="explore-heading" tabindex="-1">Explore recovered records</h2></div><p class="note">50 records per page</p></div>
+      <div class="controls" id="explorer-controls" hidden>
+        <div class="field search-field"><label for="search">Search records</label><input id="search" type="search" placeholder="Password, mask, or source" spellcheck="false" autocomplete="off" aria-controls="records" aria-describedby="search-hint"></div>
+        <div class="field"><label for="sort">Sort records</label><select id="sort" aria-controls="records"><option value="source">Input order</option><option value="short">Length ascending</option><option value="long">Length descending</option></select></div>
+      </div>
+      <p id="search-hint" class="note">Search is case-insensitive and stays in this browser. Length sorting uses bytes.</p>
+      <div class="table-wrapper" tabindex="0" role="region" aria-labelledby="records-caption">
+        <table class="responsive-table"><caption id="records-caption">Recovered passwords and their source locations</caption>
+          <thead><tr><th scope="col">Password</th><th scope="col">Bytes</th><th scope="col">Mask</th><th scope="col">Source : line</th></tr></thead>
+          <tbody id="records"></tbody>
+        </table>
+      </div>
+      <p id="empty" class="empty-state" hidden>No records match your search. Try a different password, mask, or source.</p>
+      <div class="pagination" id="pagination" hidden><p id="status" role="status" aria-atomic="true"></p><div class="page-actions"><button id="prev" type="button" aria-controls="records" aria-disabled="true">Previous</button><button id="next" type="button" aria-controls="records">Next</button></div></div>
+      <noscript><p>Enable JavaScript to search records, or open <a href="passwords.csv">Detailed CSV</a>. The summary charts and downloads work without JavaScript.</p></noscript>
+    </section>
+    <section class="card wide"><h2>Input files</h2>
+      <div class="table-wrapper" tabindex="0" role="region" aria-labelledby="sources-caption">
+        <table class="responsive-table"><caption id="sources-caption">Files included in this report</caption><thead><tr><th scope="col">Path</th><th scope="col">Format</th><th scope="col">Records</th></tr></thead><tbody>@@SOURCES@@</tbody></table>
+      </div>
+    </section>
+  </main>
+  <footer class="shell report-footer"><h2>Reading this report</h2>
+    <p>Empty passwords: @@EMPTY_COUNT@@. Masks preserve byte order: <code>?u</code> uppercase, <code>?l</code> lowercase, <code>?d</code> digit, <code>?s</code> printable ASCII symbol/space, <code>?b</code> any byte.</p>
+    <p class="note">Non-ASCII and control bytes use <code>?b</code>. Invalid text and controls are displayed as <code>$HEX[]</code>. CSV prefixes formula-like text with an apostrophe; Summary JSON retains exact display values. Empty passwords have no runnable mask.</p>
+    <p class="note">All analysis runs locally. This report makes no network requests.</p>
+  </footer>
+  <template id="data">@@ROWS@@</template>
+  <script>@@JS@@</script>
+  <script>@@CHART_JS@@</script>
+</body>
+</html>

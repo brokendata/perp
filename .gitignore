@@ -1,0 +1,43 @@
+# Python environments and caches
+__pycache__/
+*.py[cod]
+.venv/
+
+# Local release artifacts
+/dist/
+
+# Audit inputs and generated results
+results-*/
+*.pot
+*.potfile
+rockyou.txt
+rockyou.txt.gz
+passwords.csv
+summary.json
+password_report.html
+password_report.xlsx
+masks.csv
+HashcatMasks.txt
+HashcatMasks.hcmask
+
+# Reviewed public-dictionary demonstration only
+!/sample/passwords.csv
+!/sample/summary.json
+!/sample/password_report.html
+!/sample/password_report.xlsx
+!/sample/masks.csv
+!/sample/HashcatMasks.txt
+!/sample/HashcatMasks.hcmask
+
+# Local credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

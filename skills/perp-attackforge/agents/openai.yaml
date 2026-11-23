@@ -1,0 +1,4 @@
+interface:
+  display_name: "perp to AttackForge"
+  short_description: "Export reviewed password findings and evidence"
+  default_prompt: "Use $perp-attackforge to prepare findings and evidence from my perp results for my AttackForge project."

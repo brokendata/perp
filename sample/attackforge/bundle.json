@@ -1,0 +1,45 @@
+{
+  "schema": "perp.attackforge.bundle.v1",
+  "tool": "perp",
+  "version": "1.0",
+  "created": "2026-11-23T00:00:00+00:00",
+  "publication_status": "requires_consultant_review",
+  "metrics": {
+    "total_records": 10000,
+    "unique_passwords": 10000,
+    "duplicate_records": 0,
+    "empty_passwords": 1,
+    "account_mappings": 0
+  },
+  "sources": [
+    {
+      "id": "source-001",
+      "format": "plaintext",
+      "sha256": "290fbeebebb49889e162069d4951d48d2b571fc38edddcb0ccb19b59d3a88652",
+      "records": 10000
+    }
+  ],
+  "findings": [],
+  "review_checks": [],
+  "evidence": [
+    {
+      "id": "aggregate-summary",
+      "path": "evidence/summary.svg",
+      "mime_type": "image/svg+xml",
+      "kind": "generated_aggregate_graphic",
+      "sha256": "bd763b9c8ce12b202c0ae81a95b577e40b2fb8583c9476a1b674c8ec626da510",
+      "content_review_required": false
+    }
+  ],
+  "privacy": {
+    "password_fields_omitted": true,
+    "supplied_images_require_review": true
+  },
+  "limitations": [
+    "Input records are not unique accounts or an account crack rate.",
+    "No privilege, service role, or hash type is inferred from password values.",
+    "This is a portable review bundle, not an AttackForge-native import schema.",
+    "No account context supplied; no account-specific vulnerabilities were generated."
+  ],
+  "bundle_id": "db49b180cf2dba1b1b9e6f203ff1f98eae73c1a874fbc34226a56cdb7feb0b5b"
+}

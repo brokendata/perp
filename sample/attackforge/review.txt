@@ -1,0 +1,10 @@
+perp to AttackForge: local review bundle
+Bundle: db49b180cf2dba1b1b9e6f203ff1f98eae73c1a874fbc34226a56cdb7feb0b5b
+Recovered records: 10,000
+Draft findings: 0
+
+No upload has been performed. Review project scope, roles, severity, assets, and images.
+
+Outstanding context checks: 0
+Generated summary.svg is a graphic, not a screenshot.
+Do not attach the ordinary perp report or raw CSV/potfiles without explicit sensitive-data scope.
