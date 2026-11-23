@@ -1,7 +1,9 @@
 # Password Excel(lent) Reporting Python
 
-perp **1.0** is an offline dashboard for recovered passwords from
-Hashcat, John the Ripper, and plaintext lists.
+perp (Password Excel(lent) Reporting Python) is a tool for extracting information
+from hashcat or john potfiles and generates a dashboard report (exportable to Excel),
+providing a holistic and eye catching visual representation of cracked passwords and
+patterns contained in them.
 
 Python 3.10+ runs the tool on Windows, Linux, and macOS. HTML, CSV, JSON, and mask
 exports have **no third-party runtime dependencies**. Optional native Excel export
