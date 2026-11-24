@@ -1,4 +1,4 @@
-# Password Excel(lent) Reporting Python
+# 🔐 Password Excel(lent) Reporting Python
 
 **Cracked passwords. Clear patterns. Colourful reports.**
 
@@ -7,17 +7,17 @@ from hashcat or john potfiles and generates a dashboard report (exportable to Ex
 providing a holistic and eye catching visual representation of cracked passwords and
 patterns contained in them. Plaintext password lists are supported too.
 
-[Quick start](#quick-start) · [Options](#options) · [Screenshots](#see-it-in-action) · [AttackForge](#attackforge)
+[🚀 Quick start](#quick-start) · [⚙️ Options](#options) · [📊 Screenshots](#see-it-in-action) · [🔗 AttackForge](#attackforge) · [📜 History](#history)
 
 ## Release 1.0
 
 The first Python release brings offline reporting to Linux, macOS, and Windows.
 Requires Python 3.10+.
 
-- **Explore patterns:** interactive donut charts, hash/credential types, character-set profiles, password lengths, frequent passwords, and masks.
-- **Make it yours:** System, Light, and Dark themes, searchable records, and clickable chart legends.
-- **Take the results with you:** standalone HTML, Excel, CSV, JSON, and Hashcat masks.
-- **Feed your workflow:** multiple files, directory scanning, timestamped results, and AttackForge review bundles.
+- 📊 **Explore patterns:** interactive donut charts, hash/credential types, character-set profiles, password lengths, frequent passwords, and masks.
+- 🎨 **Make it yours:** System, Light, and Dark themes, searchable records, and clickable chart legends.
+- 📁 **Take the results with you:** standalone HTML, Excel, CSV, JSON, and Hashcat masks.
+- 🔗 **Feed your workflow:** multiple files, directory scanning, timestamped results, and AttackForge review bundles.
 
 [Full changelog](CHANGELOG.md)
 
@@ -183,11 +183,11 @@ The [sample report](sample/README.md) explores 10,000 public RockYou entries and
 [HTML dashboard](sample/password_report.html) locally, or try the
 [Excel workbook](sample/password_report.xlsx).
 
-**Light**
+**☀️ Light**
 
 ![Light dashboard: password lengths and character-set charts](docs/screenshots/dashboard-light.png)
 
-**Dark**
+**🌙 Dark**
 
 ![Dark dashboard: password lengths and character-set charts](docs/screenshots/dashboard-dark.png)
 
@@ -262,6 +262,15 @@ findings to in-scope assets, check for duplicates, attach evidence, and verify
 the published records. The JSON is an intermediate review format, not a native
 AttackForge import payload. Live publication requires a connection with the
 appropriate permissions.
+
+## History
+
+perp began as a collection of Bash and PowerShell scripts for analyzing cracked
+passwords and generating Excel reports with charts and PivotTables. Version 1.0
+brings those ideas together in a Python tool that runs on Linux, macOS, and
+Windows, adding interactive HTML dashboards, light and dark themes, broader
+input support, hash-type reporting, and AttackForge export workflows while
+retaining optional Excel output.
 
 ## Development
 
