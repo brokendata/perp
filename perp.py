@@ -14,6 +14,7 @@ from collections import Counter
 from datetime import datetime
 from pathlib import Path
 from potfile_parser import PARSER_REVISION, parse_record
+from hash_types import PLAINTEXT, identify_hash_type, normalize_hint
 
 VERSION = "1.0"
 PRODUCT_NAME = "Password Excel(lent) Reporting Python"
@@ -44,7 +45,8 @@ def discover(paths: list[str], recursive: bool = False) -> list[Path]:
     return sorted(found.values())
 
 
-def records(path: Path, input_format: str, encoding: str, separator: bytes, field: int | None):
+def records(path: Path, input_format: str, encoding: str, separator: bytes, field: int | None,
+            *, with_hash_type=False, hash_type='auto'):
     fmt = input_format
     if fmt == "auto":
         fmt = "potfile" if path.suffix.lower() in {".pot", ".potfile"} else "plaintext"
@@ -59,13 +61,15 @@ def records(path: Path, input_format: str, encoding: str, separator: bytes, fiel
                 if not line:
                     continue
                 try:
-                    _, raw = parse_record(line, separator, field, fmt if fmt in {"hashcat", "john"} else "auto")
+                    hashed, raw = parse_record(line, separator, field, fmt if fmt in {"hashcat", "john"} else "auto")
+                    type_name, type_basis = identify_hash_type(hashed, hash_type)
                 except ValueError as error:
                     raise ValueError(f"{path.name}:{number}: {error}") from error
             else:
                 # Plaintext is literal, including $HEX[] strings and empty passwords.
                 raw = line
-            yield number, raw, fmt
+                type_name, type_basis = PLAINTEXT, 'plaintext'
+            yield (number, raw, fmt, type_name, type_basis) if with_hash_type else (number, raw, fmt)
 
 
 def character_set_profile(row: dict) -> str:
@@ -110,9 +114,11 @@ def ranked(counter: Counter) -> list[dict]:
     return [{"label": str(k), "count": v} for k, v in sorted(counter.items(), key=lambda p: (-p[1], str(p[0])))]
 
 
-def collect(files: list[Path], fmt: str, encoding: str, separator: bytes, field: int):
+def collect(files: list[Path], fmt: str, encoding: str, separator: bytes, field: int, hash_type='auto'):
+    hash_type = normalize_hint(hash_type)
     rows, sources = [], []
     frequencies, masks, lengths, patterns, types, profiles = (Counter() for _ in range(6))
+    hash_types, type_bases = Counter(), Counter()
     for path in files:
         count = 0
         # Digest identifies the exact input without copying the potfile into the output.
@@ -121,15 +127,19 @@ def collect(files: list[Path], fmt: str, encoding: str, separator: bytes, field:
             for chunk in iter(lambda: stream.read(1024 * 1024), b""):
                 digest.update(chunk)
         actual_format = ("potfile" if path.suffix.lower() in {".pot", ".potfile"} else "plaintext") if fmt == "auto" else fmt
-        for number, raw, actual_format in records(path, fmt, encoding, separator, field):
+        for number, raw, actual_format, type_name, type_basis in records(
+                path, fmt, encoding, separator, field, with_hash_type=True, hash_type=hash_type):
             row = analyze(raw, encoding)
             row.update(source=str(path), line=number)
+            row.update(hash_type=type_name, hash_type_basis=type_basis)
             rows.append(row)
             frequencies[raw] += 1
             masks[row["mask"]] += 1
             lengths[row["byte_length"]] += 1
             patterns[row["pattern"]] += 1
             profiles[row["charset_profile"]] += 1
+            hash_types[type_name] += 1
+            type_bases[type_basis] += 1
             for key in ("upper", "lower", "digit", "special", "other_byte"):
                 types[key] += int(row[key] > 0)
             count += 1
@@ -145,6 +155,8 @@ def collect(files: list[Path], fmt: str, encoding: str, separator: bytes, field:
                "lengths": [{"label": str(k), "count": v} for k, v in sorted(lengths.items())],
                "masks": ranked(masks), "patterns": ranked(patterns), "character_types": ranked(types),
                "character_set_profiles": ranked(profiles),
+               "hash_types": ranked(hash_types), "hash_type_bases": ranked(type_bases),
+               "hash_type_hint": hash_type,
                "top_passwords": [{"label": analyze(k, encoding)["password"], "count": v}
                                  for k, v in sorted(frequencies.items(), key=lambda p: (-p[1], p[0]))[:20]]}
     return rows, summary
@@ -184,9 +196,15 @@ def write_results(rows, summary, output_root: Path, excel=False, attackforge=Fal
         validate_export(rows, summary)
     summary['excel_export'] = bool(excel)
     output_root.mkdir(parents=True, exist_ok=True)
-    stamp = datetime.now().strftime("results-%Y%m%d-%H%M%S-%f")
-    result = output_root / stamp
-    result.mkdir()  # Exclusive creation: never overwrite an existing run.
+    stamp = datetime.now().strftime("results-%Y%m%d-%H%M%S")
+    counter = 1
+    while True:
+        result = output_root / (stamp if counter == 1 else f"{stamp}-{counter}")
+        try:
+            result.mkdir()  # Atomic reservation, including concurrent runs.
+            break
+        except FileExistsError:
+            counter += 1
     try:
         if excel:
             from excel_export import write_excel
@@ -215,6 +233,7 @@ def main(argv=None) -> int:
     parser.add_argument("-r", "--recursive", action="store_true", help="Recurse into input directories")
     parser.add_argument("-o", "--output-root", type=Path, default=Path.cwd(), help="Parent of a new results-timestamp folder")
     parser.add_argument("--format", choices=["auto", "plaintext", "potfile", "hashcat", "john"], default="auto")
+    parser.add_argument("--hash-type", default="auto", help="Type label for otherwise unidentified potfile hashes (e.g. NTLM, LM, MD5, or a custom name); never overrides recognized signatures or plaintext")
     parser.add_argument("--encoding", default="utf-8", help="Password display encoding (default UTF-8); masks always use original bytes")
     parser.add_argument("--separator", default=":", help="Potfile field separator (default colon)")
     parser.add_argument("--password-field", type=int, help="Explicit layout override: number of separators before password; default uses format-aware boundaries")
@@ -237,7 +256,7 @@ def main(argv=None) -> int:
             raise ValueError("Input encoding must be ASCII-compatible; convert UTF-16/32 files to UTF-8 first.")
         fmt = args.format
         files = discover(args.inputs, args.recursive)
-        rows, summary = collect(files, fmt, args.encoding, args.separator.encode("utf-8"), args.password_field)
+        rows, summary = collect(files, fmt, args.encoding, args.separator.encode("utf-8"), args.password_field, args.hash_type)
         result = write_results(rows, summary, args.output_root, excel=args.excel, attackforge=args.attackforge,
                                account_context=args.account_context, evidence=args.evidence)
     except (ValueError, OSError, LookupError) as error:

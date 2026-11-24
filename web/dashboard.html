@@ -35,17 +35,17 @@
     <section class="card wide">
       <div class="section-heading"><div><p class="eyebrow">Record explorer</p><h2 id="explore-heading" tabindex="-1">Explore recovered records</h2></div><p class="note">50 records per page</p></div>
       <div class="controls" id="explorer-controls" hidden>
-        <div class="field search-field"><label for="search">Search records</label><input id="search" type="search" placeholder="Password, mask, or source" spellcheck="false" autocomplete="off" aria-controls="records" aria-describedby="search-hint"></div>
+        <div class="field search-field"><label for="search">Search records</label><input id="search" type="search" placeholder="Password, mask, hash type, or source" spellcheck="false" autocomplete="off" aria-controls="records" aria-describedby="search-hint"></div>
         <div class="field"><label for="sort">Sort records</label><select id="sort" aria-controls="records"><option value="source">Input order</option><option value="short">Length ascending</option><option value="long">Length descending</option></select></div>
       </div>
       <p id="search-hint" class="note">Search is case-insensitive and stays in this browser. Length sorting uses bytes.</p>
       <div class="table-wrapper" tabindex="0" role="region" aria-labelledby="records-caption">
         <table class="responsive-table"><caption id="records-caption">Recovered passwords and their source locations</caption>
-          <thead><tr><th scope="col">Password</th><th scope="col">Bytes</th><th scope="col">Mask</th><th scope="col">Source : line</th></tr></thead>
+          <thead><tr><th scope="col">Password</th><th scope="col">Bytes</th><th scope="col">Mask</th><th scope="col">Hash / credential type</th><th scope="col">Source : line</th></tr></thead>
           <tbody id="records"></tbody>
         </table>
       </div>
-      <p id="empty" class="empty-state" hidden>No records match your search. Try a different password, mask, or source.</p>
+      <p id="empty" class="empty-state" hidden>No records match your search. Try a different password, mask, hash type, or source.</p>
       <div class="pagination" id="pagination" hidden><p id="status" role="status" aria-atomic="true"></p><div class="page-actions"><button id="prev" type="button" aria-controls="records" aria-disabled="true">Previous</button><button id="next" type="button" aria-controls="records">Next</button></div></div>
       <noscript><p>Enable JavaScript to search records, or open <a href="passwords.csv">Detailed CSV</a>. The summary charts and downloads work without JavaScript.</p></noscript>
     </section>

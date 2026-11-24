@@ -5,6 +5,8 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from datetime import datetime
+from unittest.mock import patch
 from pathlib import Path
 
 import perp
@@ -119,6 +121,28 @@ class PerpTests(unittest.TestCase):
         self.assertNotIn("", masks)
         self.assertEqual(len(masks), len(set(masks)))
         self.assertEqual(json.loads((first / "summary.json").read_text())["total"], 4)
+
+    def test_second_resolution_results_preserve_colliding_runs(self):
+        path = self.file("plain.txt", b"sample\n")
+        rows, summary = perp.collect([path], "plaintext", "utf-8", b":", None)
+        output = self.root / "reports"
+        existing = output / "results-20261124-123456"
+        existing.mkdir(parents=True)
+        sentinel = existing / "keep.txt"
+        sentinel.write_text("original")
+        with patch("perp.datetime") as clock:
+            clock.now.return_value = datetime(2026, 11, 24, 12, 34, 56, 123456)
+            second = perp.write_results(rows, summary, output)
+            third = perp.write_results(rows, summary, output)
+        self.assertEqual(second.name, "results-20261124-123456-2")
+        self.assertEqual(third.name, "results-20261124-123456-3")
+        self.assertEqual(sentinel.read_text(), "original")
+        self.assertTrue((second / "password_report.html").is_file())
+        self.assertTrue((third / "password_report.html").is_file())
+        with patch("perp.datetime") as clock:
+            clock.now.return_value = datetime(2026, 11, 24, 12, 34, 57, 999999)
+            next_second = perp.write_results(rows, summary, output)
+        self.assertEqual(next_second.name, "results-20261124-123457")
 
     def test_python_cli_structured_potfile(self):
         hashed = b"$krb5tgs$23$*svc$EXAMPLE.TEST$MSSQLSvc/server:1433*$" + b"a" * 32 + b"$" + b"b" * 128

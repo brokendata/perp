@@ -60,7 +60,9 @@ class ExcelExportTests(unittest.TestCase):
                 self.assertEqual(totals['B13'].find('s:v', NS).text, '5')
                 for formula in overview.findall('.//s:f', NS):
                     self.assertRegex(formula.text, r'^B\d+/\$B\$13$')
-                self.assertEqual(len([name for name in archive.namelist() if name.startswith('xl/charts/chart') and name.endswith('.xml')]), 2)
+                self.assertIn('Hash / credential type', text)
+                self.assertIn('Plaintext (no hash)', text)
+                self.assertEqual(len([name for name in archive.namelist() if name.startswith('xl/charts/chart') and name.endswith('.xml')]), 3)
                 self.assertEqual(len([name for name in archive.namelist() if name.startswith('xl/tables/table') and name.endswith('.xml')]), 2)
 
     @unittest.skipUnless(importlib.util.find_spec('xlsxwriter'), 'Optional Excel dependency not installed')

@@ -9,11 +9,11 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 ROOT = Path(__file__).resolve().parents[1]
 FILES = (
     '.gitignore', 'README.md', 'CHANGELOG.md', 'WORDLISTS.md',
-    'perp.py', 'potfile_parser.py', 'dashboard_renderer.py', 'excel_export.py',
+    'perp.py', 'potfile_parser.py', 'hash_types.py', 'dashboard_renderer.py', 'excel_export.py',
     'attackforge_export.py', 'requirements-excel.txt', 'scripts/prepare_release.py',
     'web/logo.txt', 'web/dashboard.html', 'web/dashboard.css',
     'web/dashboard.js', 'web/charts.js',
-    'tests/test_perp.py', 'tests/test_potfile_parser.py',
+    'tests/test_perp.py', 'tests/test_potfile_parser.py', 'tests/test_hash_types.py',
     'tests/test_excel_export.py', 'tests/test_dashboard_charts.py',
     'tests/test_attackforge_export.py', 'tests/check_dashboard.cjs',
     'tests/check_charts.cjs',

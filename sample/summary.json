@@ -898,5 +898,18 @@
       "count": 1
     }
   ],
-  "excel_export": true
+  "excel_export": true,
+  "hash_types": [
+    {
+      "label": "Plaintext (no hash)",
+      "count": 10000
+    }
+  ],
+  "hash_type_bases": [
+    {
+      "label": "plaintext",
+      "count": 10000
+    }
+  ],
+  "hash_type_hint": "auto"
 }

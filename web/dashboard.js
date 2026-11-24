@@ -41,7 +41,7 @@ let searchTimer;
 // Filtering and sorting are cached between page changes, not repeated per page.
 function applyFilters() {
   const query = search.value.toLowerCase();
-  selected = query ? rows.filter(row => [row.password, row.mask, row.source].some(value => value.toLowerCase().includes(query))) : rows;
+  selected = query ? rows.filter(row => [row.password, row.mask, row.source, row.hash_type || ''].some(value => value.toLowerCase().includes(query))) : rows;
   if (sort.value !== 'source') selected = [...selected].sort((a, b) => sort.value === 'short' ? a.byte_length - b.byte_length : b.byte_length - a.byte_length);
   page = 0;
   render();
@@ -52,8 +52,9 @@ function render() {
   const fragment = document.createDocumentFragment();
   for (const row of selected.slice(page * pageSize, (page + 1) * pageSize)) {
     const tr = document.createElement('tr');
-    const values = [row.password || '(empty)', row.byte_length, row.mask || '(empty)', row.source + ' : ' + row.line];
-    const labels = ['Password', 'Bytes', 'Mask', 'Source : line'];
+    const type = row.hash_type || 'Unknown / ambiguous';
+    const values = [row.password || '(empty)', row.byte_length, row.mask || '(empty)', type + (row.hash_type_basis === 'declared' ? ' (declared)' : ''), row.source + ' : ' + row.line];
+    const labels = ['Password', 'Bytes', 'Mask', 'Hash / credential type', 'Source : line'];
     values.forEach((value, index) => {
       const cell = document.createElement(index === 0 ? 'th' : 'td');
       if (index === 0) cell.scope = 'row';

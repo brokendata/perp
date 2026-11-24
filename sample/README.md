@@ -26,6 +26,9 @@ The [README screenshots](../docs/screenshots/) are browser captures of this repo
 Hover/focus donut legends, hide/restore categories, search records, and switch
 System/Light/Dark in the HTML to explore the interactive output.
 
+The hash/credential-type chart shows `Plaintext (no hash)` for this wordlist.
+Hash-bearing inputs are required to demonstrate detected or declared algorithms.
+
 Generate your own report from an independently obtained plaintext input:
 
 ```bash

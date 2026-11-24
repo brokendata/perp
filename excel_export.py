@@ -93,6 +93,28 @@ def write_excel(path: Path, rows, summary):
         overview.insert_chart('E23', bars)
 
         source_start = max(46, length_start+len(lengths)+4)
+        hash_types = summary.get('hash_types', [])
+        if hash_types:
+            type_start = max(64, length_start+len(lengths)+4)
+            overview.write_row(type_start-1, 0, ['Hash / credential type', 'Records', 'Share'], header)
+            for index, item in enumerate(hash_types, type_start):
+                overview.write_string(index, 0, item['label'], literal)
+                overview.write_number(index, 1, item['count'], integer)
+                overview.write_formula(index, 2, f'=B{index+1}/$B$13', percent, item['count']/summary['total'])
+            hash_pie = book.add_chart({'type': 'doughnut'})
+            hash_pie.add_series({'name': 'Hash / credential types',
+                                 'categories': ['Summary', type_start, 0, type_start+len(hash_types)-1, 0],
+                                 'values': ['Summary', type_start, 1, type_start+len(hash_types)-1, 1],
+                                 'points': [{'fill': {'color': PALETTE[i % len(PALETTE)]}} for i in range(len(hash_types))]})
+            hash_pie.set_title({'name': 'Hash / credential types'})
+            hash_pie.set_hole_size(58)
+            hash_pie.set_legend({'position': 'right', 'font': {'size': 9}})
+            hash_pie.set_size({'width': 570, 'height': 320})
+            overview.insert_chart('E44', hash_pie)
+            source_start = max(66, type_start+len(hash_types)+4)
+            overview.merge_range(source_start-2, 0, source_start-2, 11,
+                                 'Types are recognized signatures or user-declared labels, not verification. Unknown digests are not guessed. Counts include LM halves; plaintext has no hash.', muted)
+            overview.set_row(source_start-2, 30)
         overview.write_row(source_start, 0, ['Input file', 'Format', 'Records'], header)
         overview.merge_range(source_start, 3, source_start, 11, 'Input SHA-256', header)
         for index, source in enumerate(summary['sources'], source_start+1):

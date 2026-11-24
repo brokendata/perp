@@ -83,6 +83,15 @@ def dashboard(rows, summary):
                              ("Repeated records", summary["duplicate_records"]), ("Distinct masks", len(summary["masks"]))]
     )
     charts = chart("Password lengths · bytes", summary["lengths"], total, 30, pie=True)
+    if summary.get('hash_types'):
+        bases = {item['label']: item['count'] for item in summary.get('hash_type_bases', [])}
+        identification = ' Identification basis: ' + ', '.join(
+            f'{bases.get(key, 0):,} {name}' for key, name in
+            (('signature', 'signature matches'), ('declared', 'user-declared'),
+             ('unknown', 'unknown'), ('plaintext', 'plaintext'))) + '.' if bases else ''
+        charts += chart('Hash / credential types', summary['hash_types'], total,
+                        limit=len(summary['hash_types']), pie=True,
+                        description='Types come from format signatures or user declarations; ambiguous digests remain unknown. Plaintext has no hash. Counts include recovered records and LM halves, not accounts or a crack rate. Expand chart data for all types.' + identification)
     if "character_set_profiles" in summary:
         charts += chart("Character-set profiles", summary["character_set_profiles"], total, pie=True,
                         description="One profile per record: upperlower = both letter cases only; alphanum = letters (either case) + digits; alphanumspecial = letters + digits + symbols/spaces. Non-ASCII/control bytes are grouped separately. Expand chart data for every profile and count.")

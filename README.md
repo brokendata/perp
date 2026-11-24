@@ -1,343 +1,272 @@
 # Password Excel(lent) Reporting Python
 
+**Cracked passwords. Clear patterns. Colourful reports.**
+
 perp (Password Excel(lent) Reporting Python) is a tool for extracting information
 from hashcat or john potfiles and generates a dashboard report (exportable to Excel),
 providing a holistic and eye catching visual representation of cracked passwords and
-patterns contained in them.
+patterns contained in them. Plaintext password lists are supported too.
 
-Python 3.10+ runs the tool on Windows, Linux, and macOS. HTML, CSV, JSON, and mask
-exports have **no third-party runtime dependencies**. Optional native Excel export
-uses XlsxWriter; Microsoft Excel is not required to generate files.
+[Quick start](#quick-start) · [Options](#options) · [Screenshots](#see-it-in-action) · [AttackForge](#attackforge)
 
-## Sample dashboard
+## Release 1.0
 
-The [sample folder](sample/README.md) contains a reviewed v1.0 report from a
-10,000-entry public RockYou excerpt: 10,000 unique records and 150 masks. It
-demonstrates dictionary patterns, not an account crack rate or customer findings.
-Original machine paths have been replaced with a neutral source label.
+The first Python release brings offline reporting to Linux, macOS, and Windows.
+Requires Python 3.10+.
 
-Download the project and open [sample/password_report.html](sample/password_report.html)
-locally for interactive charts, record search, and theme switching. GitHub previews
-the HTML source rather than running it. You can also download the
-[Excel workbook](sample/password_report.xlsx) or inspect the
-[summary JSON](sample/summary.json). The full wordlist is not bundled.
+- **Explore patterns:** interactive donut charts, hash/credential types, character-set profiles, password lengths, frequent passwords, and masks.
+- **Make it yours:** System, Light, and Dark themes, searchable records, and clickable chart legends.
+- **Take the results with you:** standalone HTML, Excel, CSV, JSON, and Hashcat masks.
+- **Feed your workflow:** multiple files, directory scanning, timestamped results, and AttackForge review bundles.
 
-Light theme, showing length/profile donuts and overlapping character-set counts:
+[Full changelog](CHANGELOG.md)
 
-![Light dashboard with password length and character-set charts](docs/screenshots/dashboard-light.png)
+## Quick start
 
-Dark theme of the same sample:
+Clone this repository and run:
 
-![Dark dashboard with password length and character-set charts](docs/screenshots/dashboard-dark.png)
+```bash
+git clone https://github.com/brokendata/perp.git
+cd perp
+python3 ./perp.py ./hashcat.potfile --format hashcat --output-root ./reports
+```
 
-## Install dependencies
+Open `password_report.html` in the new `results-*` folder. Standard reports need
+no additional Python packages, server, or internet connection.
+On Windows, use `python` instead of `python3`.
 
-Run the commands from the project directory after downloading or cloning perp.
+## Installation
 
 ### Kali Linux
 
-On **Kali Linux, prefer `apt` over system-wide `pip`**. Kali marks its system
-Python as externally managed (PEP 668), so global and `--user` pip installs can
-fail with `externally-managed-environment`. Use the distribution packages:
+Prefer **apt** for Kali's externally managed Python environment:
 
 ```bash
 sudo apt update
 sudo apt install python3
-# Optional: only needed for --excel
+# Optional Excel export
 sudo apt install python3-xlsxwriter
-
-python3 ./perp.py /path/to/rockyou.txt --encoding latin-1 --excel --output-root ./reports
 ```
 
-The normal HTML/CSV/JSON/mask exports and local AttackForge bundle need only
-Python 3.10+; there is no pip install step for them. `apt` installs Python and
-the optional library, while perp runs directly from this project directory.
-See [Kali's Python package guidance](https://www.kali.org/docs/general-use/python3-external-packages/)
-and the [Kali XlsxWriter package repository](https://http.kali.org/kali/pool/main/x/xlsxwriter/).
-
-If you need the PyPI versions from `requirements-excel.txt`, use an isolated
-virtual environment instead of modifying Kali's system Python:
-
-```bash
-sudo apt install python3-venv
-python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements-excel.txt
-.venv/bin/python ./perp.py /path/to/rockyou.txt --encoding latin-1 --excel
-```
-
-Do not use `sudo pip`, `pip install --user`, or `--break-system-packages` to
-bypass Kali's protection. A default virtual environment does not see packages
-installed by `apt`; use `python3` for the apt-installed library, or install the
-requirements inside the virtual environment as shown above.
+Avoid global pip installs. See [Kali's Python package guidance](https://www.kali.org/docs/general-use/python3-external-packages/).
 
 ### macOS
 
-Use Python 3.10+; check an existing installation with `python3 --version`.
-If needed, install Python with [Homebrew](https://brew.sh/) (follow its setup
-instructions, including the shell PATH step), then run:
+Use an existing Python 3.10+ installation, or install Python with [Homebrew](https://brew.sh/):
 
 ```bash
 brew install python
-python3 --version
-
-# Standard reports: no additional packages needed
-python3 ./perp.py /path/to/rockyou.txt --encoding latin-1 --output-root ./reports
 ```
 
-For optional Excel export, install XlsxWriter in a virtual environment.
-[Homebrew's Python is also externally managed](https://docs.brew.sh/Language-Runtimes-and-Packages#python),
-so use the environment's pip rather than installing into Homebrew's Python:
+For Excel export, use the virtual environment below.
+
+### Windows
+
+Use Python 3.10+ and run commands with `python`. For Excel export:
+
+```text
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install -r requirements-excel.txt
+.venv\Scripts\python.exe ./perp.py ./hashcat.potfile --format hashcat --excel
+```
+
+### Optional Excel dependency — Linux / macOS
+
+If you are not using Kali's apt package, install XlsxWriter in a virtual environment.
+On Kali, install `python3-venv` with apt first.
 
 ```bash
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements-excel.txt
-.venv/bin/python ./perp.py /path/to/rockyou.txt --encoding latin-1 --excel --output-root ./reports
+.venv/bin/python ./perp.py ./hashcat.potfile --format hashcat --excel
 ```
 
-These commands work from Terminal with the default zsh shell; no activation is
-required. Use `.venv/bin/python` in place of `python3` in the usage and verification
-examples when using this environment. To view a report, open the generated HTML
-in Finder or run `open "./reports/results-YOUR-RUN/password_report.html"`, replacing
-`results-YOUR-RUN` with the folder printed by perp. The RockYou example must be
-prepared separately as described below; it is not supplied by macOS or Homebrew.
+Use that environment's interpreter for subsequent commands. Microsoft Excel is
+not required to generate workbooks.
 
-### Windows
+Use **pip inside the virtual environment** here: XlsxWriter is an imported
+library. [pipx installs command-line applications](https://pipx.pypa.io/stable/explanation/comparisons.html)
+in separate environments, so installing XlsxWriter with pipx would not make it
+available to perp.
 
-An optional Excel dependency can likewise be installed in a virtual environment:
-
-```text
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements-excel.txt
-.\.venv\Scripts\python.exe .\perp.py C:\path\to\rockyou.txt --encoding latin-1 --excel
-```
-
-## Run
-
-The usage examples refer to a separately downloaded RockYou file. See
-[External wordlists](WORDLISTS.md) for the upstream download reference and input
-size guidance. The reviewed sample outputs are included separately; no input
-wordlist or compressed archive is bundled.
-
-Examples below use `python3` on Kali/Linux/macOS. On Windows, use `python`
-instead. For a virtual environment, use its Python executable as shown above.
+## Usage
 
 ```bash
-# One file (plaintext by default for .txt)
-python3 ./perp.py /path/to/rockyou.txt --encoding latin-1 --output-root ./reports
-
-# Multiple files, with automatic format detection per file
+# Multiple files
 python3 ./perp.py ./hashcat.potfile ./john.pot
 
-# Directory or quoted wildcard; recurse into subdirectories if desired
+# Scan a directory, including subdirectories
 python3 ./perp.py ./inputs --recursive --output-root ./reports
-python3 ./perp.py "./inputs/*.pot*" --output-root ./reports
 
-# Optional Excel workbook alongside the standalone HTML report
-# Install XlsxWriter using the platform instructions above first.
-python3 ./perp.py /path/to/rockyou.txt --encoding latin-1 --excel --output-root ./reports
+# Match files with a quoted wildcard
+python3 ./perp.py "./inputs/*.pot*"
+
+# Plaintext wordlist
+python3 ./perp.py /path/to/rockyou.txt --format plaintext --encoding latin-1
+
+# Add an Excel workbook
+python3 ./perp.py ./hashcat.potfile --format hashcat --excel
+
+# Label bare NTLM digests when the cracking job's type is known
+python3 ./perp.py ./ntlm.potfile --format hashcat --hash-type NTLM
 ```
 
-`--output-root` defaults to the current directory. Each invocation
-creates its own `results-YYYYMMDD-HHMMSS-microseconds` directory using local time.
-Existing results and input files are never overwritten. Open `password_report.html`
-directly in a browser; no web server or internet connection is needed.
-Use the Theme selector in the report header to choose System, Light, or Dark.
-System follows live changes in your OS preference. Manual choices are remembered
-when browser local storage is available; selecting System removes the override.
-Printing always uses light colors. Charts have labeled data tables, and record
-tables stack into labeled cards when their container is narrow. Keyboard users
-can skip straight to the record explorer and focus scrollable tables.
+RockYou is available separately; see [External wordlists](WORDLISTS.md).
 
-The HTML remains a single offline file. Keep `dashboard_renderer.py` and the
-`web/` source assets alongside the scripts when copying or installing perp; these
-are embedded during generation, so generated reports do not need those files.
-Search is debounced, filtering/sorting is cached between page changes, and only
-50 records are rendered at once. The full dataset is still embedded in the HTML.
+## Options
 
-Colorful SVG donut charts show password lengths, frequent passwords, masks, and
-character combinations. Hover/tap a slice or focus a legend button to inspect
-counts and percentages; activate legend buttons to hide/show categories, and
-use Show all categories to reset. Each donut shows the six leading categories
-plus Other categories, including records beyond the top-password summary.
-Hiding changes only that chart, with shares recalculated over visible categories.
-Character-set presence stays a bar chart because its groups overlap. Expand
-View chart data for the original counts and shares. SVG, chart code, styles, and
-data are embedded; no chart library, CDN, or network access is required.
+```text
+python3 perp.py INPUT [INPUT ...] [OPTIONS]
+```
 
-The Character-set profiles donut counts one profile per recovered record:
-`upper`, `lower`, `upperlower` (both letter cases only), `alphanum` (letters of
-either case plus digits), `alphanumspecial` (letters, digits, symbols/spaces),
-`alphaspecial`, `numeric`, `numspecial`, `special`, or `empty`. Records with any
-non-ASCII/control bytes use `non-ASCII/control`. These categories are mutually
-exclusive and sum to the total record count. The detailed CSV includes
-`charset_profile`, and Summary JSON includes `character_set_profiles`.
+| Argument / option | Purpose | Default |
+| --- | --- | --- |
+| `INPUT [INPUT ...]` | One or more files, directories, or quoted wildcard patterns. | Required |
+| `-r`, `--recursive` | Include subdirectories when scanning directories. | Off |
+| `-o PATH`, `--output-root PATH` | Create a new timestamped result folder under this path. | Current directory |
+| `--format FORMAT` | Input dialect: `auto`, `plaintext`, `potfile`, `hashcat`, or `john`. | `auto` |
+| `--hash-type TYPE` | Label otherwise unidentified potfile hashes, e.g. `NTLM`, `LM`, `MD5`, or any custom name. Recognized signatures and plaintext are unchanged. | `auto` |
+| `--encoding NAME` | Input text/display encoding, such as `utf-8`, `latin-1`, or `cp1252`. | `utf-8` |
+| `--separator TEXT` | Delimiter between potfile fields. | `:` |
+| `--password-field N` | Treat everything after the Nth separator as the password. | Format-aware parsing |
+| `--excel` | Add an XLSX workbook; requires XlsxWriter. | Off |
+| `--attackforge` | Prepare a local AttackForge review bundle. | Off |
+| `--account-context CSV` | Map source records to confirmed accounts, assets, and roles; requires `--attackforge`. | None |
+| `--evidence IMAGE` | Attach a PNG, JPEG, or WebP for review; repeatable, requires `--attackforge`. | None |
+| `--version` | Print the version and exit. | — |
+| `-h`, `--help` | Show command-line help and exit. | — |
 
-## Input formats
+### Choosing an input format
 
-- `auto`: `.pot` and `.potfile` are potfiles; everything else is plaintext.
-- `--format plaintext`: one literal password per line, including blank lines,
-  spaces, colons, and literal `$HEX[...]` text. An empty file has no records.
-- `--format potfile` (also selected by `auto` for potfile extensions) uses a
-  conservative boundary parser: known Kerberos TGS/AS-REP and NetNTLMv1/v2 layouts
-  are recognized as complete hashes, including internal colons. Unknown layouts
-  with multiple separators fail rather than guessing. Simple records with only
-  one separator can be split unambiguously; this does not validate the algorithm.
-- `--format hashcat` is for **canonical Hashcat potfiles**. It follows Hashcat's
-  final-separator rule and decodes `$HEX[]` passwords. Hashcat encodes passwords
-  containing the separator, so internal hash fields stay out of the password.
-  This mode supports hash representations beyond the built-in recognizers but
-  trusts the input to be a genuine Hashcat potfile, not a custom `--show` export.
-- `--format john` uses the conservative parser; unsupported John formats need an
-  explicit layout. Empty potfile lines are ignored; `hash:` is an empty password.
-- Hashcat `$HEX[...]` passwords are decoded to original bytes in potfile mode.
-  Invalid hex and malformed potfile lines fail with file and line context.
-- For hashes/salts containing separators, explicitly set `--password-field N`:
-  `hash:salt:password` needs `--password-field 2`. All text after that separator
-  belongs to the password. This is a deliberate override, never the default.
-  Nonstandard exports with trailing metadata need normalization into a documented
-  layout first. Never assume the first or last field of an arbitrary export is a
-  password. Split incompatible layouts into separate runs or normalize them.
-- Set `--separator '|'` for another delimiter. `--encoding cp1252` can change text
-  display for a non-UTF-8 list; use an ASCII-compatible encoding. UTF-16/32 input
-  must first be converted to UTF-8. The original password bytes drive masks.
-- Directory scans select `.txt`, `.pot`, and `.potfile`; `--recursive` includes
-  subdirectories and skips previous `results-*` directories and known output text
-  files. Explicit files/wildcards accept any extension. Overlapping paths resolve
-  to one file; identical records in different files still count independently.
+| Format | Use it for |
+| --- | --- |
+| `auto` | `.pot` / `.potfile` files use conservative potfile parsing; other extensions are plaintext. |
+| `plaintext` | One literal password per line, preserving spaces, colons, and empty passwords. |
+| `potfile` | Recognized Kerberos and NetNTLM layouts, or unambiguous `hash:password` records. |
+| `hashcat` | Canonical Hashcat potfiles, including internal hash separators and `$HEX[]` passwords. |
+| `john` | John potfiles supported by the conservative parser; custom layouts need an explicit override. |
 
-## Results
+Ambiguous multi-field records fail rather than guessing. Use `hashcat` only for
+genuine potfiles, not arbitrary `--show` exports. For a known `hash:salt:password`
+layout, `--password-field 2` selects everything after the second separator.
+Normalize exports with trailing metadata before processing them.
+
+Directory scans select `.txt`, `.pot`, and `.potfile` inputs and skip previous
+`results-*` folders and known output text files. Explicit paths accept any extension.
+Use an ASCII-compatible encoding; convert UTF-16/32 input to UTF-8 first.
+
+### Hash / credential types
+
+The dashboard and Excel workbook include a type distribution chart and a full
+count/share table. The record explorer can search by type; detailed CSV records
+include `hash_type` and `hash_type_basis` (`signature`, `declared`, `unknown`, or
+`plaintext`). Summary JSON includes `hash_types` and identification-basis counts.
+
+Automatic recognition covers supported Kerberos and NetNTLM layouts, tagged NTLM
+and LM, bcrypt, Unix crypt variants, Argon2, scrypt, PBKDF2, phpass, DCC2, and
+several database/LDAP formats. The signature registry in `hash_types.py` can be
+extended; it is not an exhaustive detector of every Hashcat/John format.
+
+Bare digests stay **Unknown / ambiguous**: a 32-character hex value alone does
+not distinguish NTLM, LM, MD5, or other algorithms. Use `--hash-type TYPE` when
+the cracking job establishes the type. Any explicit label is supported; use
+separate runs for different unknown types because the hint applies across the
+run. Signature matches remain format identification, not cryptographic proof.
+Plaintext lists show **Plaintext (no hash)**, including the RockYou sample.
+Counts describe recovered input records, including repeated records and LM
+halves, rather than accounts, full LM passwords, or an overall crack rate.
+
+## See it in action
+
+The [sample report](sample/README.md) explores 10,000 public RockYou entries and
+150 distinct masks. Download the project and open the
+[HTML dashboard](sample/password_report.html) locally, or try the
+[Excel workbook](sample/password_report.xlsx).
+
+**Light**
+
+![Light dashboard: password lengths and character-set charts](docs/screenshots/dashboard-light.png)
+
+**Dark**
+
+![Dark dashboard: password lengths and character-set charts](docs/screenshots/dashboard-dark.png)
+
+Hover or focus chart legends to inspect counts, click to hide/show categories,
+and use **View chart data** for the underlying figures. Character-set profiles
+count one category per record; character-set presence counts overlap.
+
+## Output files
+
+Each run creates `results-YYYYMMDD-HHMMSS/`. Runs within the same second add a
+counter (`-2`, `-3`, etc.) to keep earlier results intact.
 
 | File | Contents |
 | --- | --- |
-| `password_report.html` | Responsive dashboard, length/character/pattern charts, top passwords and masks, searchable and paginated records, source inventory |
-| `password_report.xlsx` (with `--excel`) | Summary with native doughnut/column charts and source inventory; filterable Passwords and Masks tables with frozen headers |
-| `passwords.csv` | Every recovered record, case-sensitive counts, character and byte lengths, ordered mask, source path and line |
-| `masks.csv` | All masks and frequencies, including an empty mask for empty passwords |
-| `HashcatMasks.hcmask` | Unique, nonempty runnable masks ordered by observed frequency |
-| `HashcatMasks.txt` | Same masks, retaining the legacy filename |
-| `summary.json` | Full aggregate distributions, top 20 passwords, input SHA-256 digests, version, and timestamp |
+| `password_report.html` | Interactive dashboard with embedded styles, scripts, and data. |
+| `password_report.xlsx` | Optional Excel workbook with charts and filterable tables (`--excel`). |
+| `passwords.csv` | Detailed records, character counts, masks, source paths, and line numbers. |
+| `masks.csv` | Mask frequencies. |
+| `HashcatMasks.hcmask` | Unique, nonempty Hashcat masks, ordered by frequency. |
+| `HashcatMasks.txt` | Compatibility copy of the masks. |
+| `summary.json` | Aggregate distributions, top passwords, and input provenance. |
+| `attackforge/` | Optional review bundle and evidence (`--attackforge`). |
 
-Mask positions follow **bytes in their original order**: `Ab9!z` becomes
-`?u?l?d?s?l`. ASCII uppercase/lowercase/digit/symbol classes are separate.
-Non-ASCII and control bytes use `?b` per byte: UTF-8 `é` becomes `?b?b`. These broad
-byte masks cover the input but can have very large search spaces. Empty passwords
-remain in reports but have no runnable mask. Masks summarize observed shapes;
-they are not password strength scores or guarantees of successful recovery.
+Masks preserve byte order: `Ab9!z` becomes `?u?l?d?s?l`. Non-ASCII/control bytes
+use `?b` per byte. Counts describe input records, not total accounts or a crack rate.
 
-The HTML uses embedded data, CSS charts, and local JavaScript; it loads no external
-scripts, fonts, or analytics. Search and sorting operate locally, 50 records per
-page. Passwords are HTML-escaped and inserted as text. Invalid text/control bytes
-are displayed as `$HEX[...]`. Formula-like CSV text gets an apostrophe prefix for
-safer opening in Excel. JSON and the HTML retain unprefixed display values.
+Reports contain recovered passwords and source paths. Keep real audit outputs
+private. Large inputs consume memory and produce large HTML files; split them
+when needed. Excel exports enforce its row and cell-size limits.
 
-Counts describe recovered input records, not total accounts or a crack rate.
-Repeated records are retained; unique password counts compare original bytes
-case-sensitively. Length charts use bytes; the detailed CSV also includes character
-length when decodable. Character classes use ASCII byte ranges. The engine keeps
-records in memory and embeds them in HTML, so very large potfiles may need to be
-split. Reports contain recovered passwords and source paths.
+## AttackForge
 
-## Excel export
+[AttackForge](https://attackforge.com/) is a penetration-testing management and
+reporting platform. Teams use it to organize engagements and affected assets,
+document vulnerabilities and evidence, produce reports, and track remediation
+and retesting.
 
-Use `--excel` after installing `python3-xlsxwriter` with `apt` on Kali, or
-`requirements-excel.txt` inside a virtual environment. Run perp with the same
-Python interpreter used for the dependency. The workbook is linked
-from the generated HTML and saved in the same timestamped folder. It contains
-the same detailed records and profile/mask counts, with native Excel charts and
-filterable tables. Passwords remain literal strings, including leading zeros,
-URLs, and text starting with `=`. Profiles and lengths include cached percentage
-formulas. PivotTables are not generated.
+perp turns password-audit results into draft findings for that workflow:
 
-Excel has a 1,048,576-row sheet limit (including the header) and a 32,767-character
-cell limit. If either limit is exceeded, `--excel` fails before creating results
-rather than truncating records; split the input or generate HTML/CSV/JSON instead.
-HTML-only runs do not load XlsxWriter. Run the Python entry point, `perp.py`.
+- **LM hash storage:** recommend disabling LM storage and coordinating password
+  changes to remove existing LM material.
+- **Recovered privileged credentials:** recommend controlled rotation, password
+  reuse review, and protection of administrative access.
+- **Recovered service credentials:** recommend coordinated rotation, dependency
+  updates, and managed service accounts where appropriate.
 
-## AttackForge export and portable skill
+These drafts require confirmed account, asset, role, and hash-type context.
+Account names alone do not establish privilege, and dictionary entries do not
+establish account vulnerabilities. See the
+[CSV requirements](skills/perp-attackforge/references/bundle-and-context.md).
 
-Use `--attackforge` to add a local review bundle under `attackforge/` in the
-timestamped result folder. It makes **no API calls or uploads**:
+Prepare a local bundle with optional screenshots:
 
 ```bash
-python3 ./perp.py ./audit.potfile --format hashcat --attackforge --account-context ./accounts.csv --evidence ./screenshots/redacted.png
+python3 ./perp.py ./audit.potfile --format hashcat --attackforge --account-context ./accounts.csv --evidence ./redacted.png
 ```
 
-`--account-context` and repeatable `--evidence` are optional. The bundle contains
-`bundle.json`, `review.txt`, an aggregate SVG graphic, and supplied PNG/JPEG/WebP
-images with SHA-256 digests. The SVG is generated evidence, **not a screenshot**.
-Images still need review for sensitive content and association with findings.
-Passwords, password-derived fingerprints, raw hashes, local source paths, and
-top-password labels are omitted from the JSON/graphic. The usual HTML/XLSX/CSV
-outputs still contain password data and are not included in this bundle.
+The `attackforge/` folder contains JSON findings, a review summary, an aggregate
+graphic, and supplied images. Password and hash values are omitted from the
+JSON/graphic; supplied screenshots still need review for sensitive content.
+The command makes no uploads.
 
-Account-specific recommendations require a CSV linking original `source` paths
-and `line` numbers to confirmed accounts, assets, roles, and hash-type evidence.
-See the CSV columns and requirements in the
-[context contract](skills/perp-attackforge/references/bundle-and-context.md).
-LM storage needs explicit confirmation of active non-placeholder storage.
-`admin`/`svc` name hints trigger review, not a confirmed privilege finding.
-Plaintext dictionaries do not establish recovered account credentials.
+To publish through a consultant's connection:
 
-The portable skill source is [skills/perp-attackforge](skills/perp-attackforge/SKILL.md),
-and the distributable is `dist/perp-attackforge-skill.zip`. It includes a standalone
-Python helper, so a consultant can prepare a bundle from existing perp results:
+1. Install the [portable skill](skills/perp-attackforge/SKILL.md) in the assistant's skill directory.
+2. Invoke `$perp-attackforge` with the results folder and intended AttackForge project.
+3. Review findings, severity, asset matches, and screenshots, then instruct the assistant to publish.
 
-```bash
-python3 ./skills/perp-attackforge/scripts/bundle.py prepare ./reports/results-RUN --account-context ./accounts.csv
-python3 ./skills/perp-attackforge/scripts/bundle.py verify ./reports/results-RUN/attackforge
-```
+The skill uses the consultant's authenticated
+[AttackForge MCP or API connection](https://attackforge.com/integrations) to map
+findings to in-scope assets, check for duplicates, attach evidence, and verify
+the published records. The JSON is an intermediate review format, not a native
+AttackForge import payload. Live publication requires a connection with the
+appropriate permissions.
 
-Extract the skill folder into the consultant's skill directory, then invoke
-`$perp-attackforge` with the result folder and intended AttackForge project. It
-prefers their connected official MCP integration and can use an authorized API
-connection when appropriate. It discovers that tenant's actual schemas, maps
-in-scope assets and severity, checks existing finding markers, attaches reviewed
-evidence, and reads back confirmed IDs. It does not ship credentials or configure
-the consultant's authentication. Missing connection permissions stop that step.
-
-The JSON is a **portable review bundle**, not an assumed native AttackForge import
-format. Publication requires a specified project and the consultant's instruction
-to publish the reviewed findings. Severity suggestions require review; no CVSS
-score is invented. Live MCP/API publication is not tested without a connection.
-
-## Password extraction correctness
-
-Parser revision 2 replaces the unsafe first-colon default. Generated summaries
-record the parser revision, format, separator, and any explicit field override.
-Regenerate old potfile-derived reports and wordlists; their password statistics
-may contain pieces of hashes or salts. Plaintext RockYou reports are unaffected.
-Usernames, domains, SPNs, ports, salts, and ticket data remain in the hash record;
-only the extracted password bytes drive password counts and masks. Actual
-passwords that happen to equal usernames remain valid password candidates.
-
-Reference behavior: [Hashcat potfile reader/writer](https://github.com/hashcat/hashcat/blob/v6.2.6/src/potfile.c),
-[Kerberos TGS parser](https://github.com/hashcat/hashcat/blob/master/src/modules/module_13100.c),
-and [example formats](https://hashcat.net/wiki/doku.php?id=example_hashes).
-
-## Verify
+## Development
 
 ```bash
 python3 -m unittest discover -s tests -v
-python3 ./perp.py --version
 ```
 
-Tests use synthetic passwords, including mixed case, colons, whitespace, empty
-passwords, non-ASCII/binary bytes, malformed records, overlapping inputs, HTML
-injection strings, CSV formulas, timestamp isolation, Python CLI behavior, and
-optional Excel literal-cell handling, native charts, cached ratios, and limits.
-
-## Release contents
-
-The release includes Python source, embedded dashboard assets, tests with synthetic
-fixtures, documentation, the portable AttackForge skill source, and the reviewed
-public-dictionary outputs under `sample/` with chart screenshots. Legacy code has
-been removed. Wordlists are obtained separately; real audit reports, audit inputs,
-credentials, and local environments are excluded. Generate a review archive and
-SHA-256 manifest with:
-
-```bash
-python3 ./scripts/prepare_release.py
-```
-
-Artifacts are written under the ignored `dist/` directory. Review the archive and
-manifest before publishing; this command does not initialize Git or upload files.
+[Changelog](CHANGELOG.md) · [Sample files](sample/README.md) · [External wordlists](WORDLISTS.md)
