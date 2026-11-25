@@ -319,6 +319,21 @@ the published records. The JSON is an intermediate review format, not a native
 AttackForge import payload. Live publication requires a connection with the
 appropriate permissions.
 
+### Updating an installed skill
+
+Installed copies do not automatically download updates from this repository.
+
+1. Download the latest perp source, or run `git pull` in a cloned checkout.
+2. Back up any customizations, then replace the entire installed `perp-attackforge`
+   folder with [skills/perp-attackforge](skills/perp-attackforge), including its
+   `scripts`, `references`, and `agents` subfolders.
+3. Codex detects local skill changes automatically; restart it if the update
+   does not appear.
+
+For easier ongoing updates, Codex also supports linking the installed skill to
+the folder in a cloned checkout. See the
+[official skill discovery and update guidance](https://learn.chatgpt.com/docs/build-skills).
+
 ## History
 
 perp began as a collection of Bash and PowerShell scripts for analyzing cracked
