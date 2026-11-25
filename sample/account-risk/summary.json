@@ -1,0 +1,596 @@
+{
+  "version": "1.1",
+  "product_name": "Password Excel(lent) Reporting Python",
+  "parser_revision": 2,
+  "password_field": null,
+  "input_format": "hashcat",
+  "separator_hex": "3a",
+  "created": "2026-11-25T12:00:00+00:00",
+  "total": 5,
+  "unique": 5,
+  "duplicate_records": 0,
+  "empty_passwords": 0,
+  "sources": [
+    {
+      "path": "synthetic/recovery.potfile",
+      "format": "hashcat",
+      "records": 5,
+      "sha256": "b48a90d4e93b9063bb166ee79a40256abd5a198bd6056d8f1a03753c4ccd8cb1"
+    }
+  ],
+  "lengths": [
+    {
+      "label": "7",
+      "count": 1
+    },
+    {
+      "label": "9",
+      "count": 2
+    },
+    {
+      "label": "11",
+      "count": 1
+    },
+    {
+      "label": "12",
+      "count": 1
+    }
+  ],
+  "masks": [
+    {
+      "label": "?u?l?l?l?u?l?l?d?s",
+      "count": 2
+    },
+    {
+      "label": "?u?l?l?l?u?l?l?l?l?d?s",
+      "count": 1
+    },
+    {
+      "label": "?u?l?l?l?u?l?l?l?l?l?d?s",
+      "count": 1
+    },
+    {
+      "label": "?u?u?u?u?u?u?u",
+      "count": 1
+    }
+  ],
+  "patterns": [
+    {
+      "label": "Upper+Lower+Digit+Special",
+      "count": 4
+    },
+    {
+      "label": "Upper",
+      "count": 1
+    }
+  ],
+  "character_types": [
+    {
+      "label": "upper",
+      "count": 5
+    },
+    {
+      "label": "digit",
+      "count": 4
+    },
+    {
+      "label": "lower",
+      "count": 4
+    },
+    {
+      "label": "special",
+      "count": 4
+    },
+    {
+      "label": "other_byte",
+      "count": 0
+    }
+  ],
+  "character_set_profiles": [
+    {
+      "label": "alphanumspecial",
+      "count": 4
+    },
+    {
+      "label": "upper",
+      "count": 1
+    }
+  ],
+  "hash_types": [
+    {
+      "label": "NTLM",
+      "count": 4
+    },
+    {
+      "label": "LM (LanMan)",
+      "count": 1
+    }
+  ],
+  "hash_type_bases": [
+    {
+      "label": "inventory",
+      "count": 5
+    }
+  ],
+  "hash_type_hint": "auto",
+  "top_passwords": [
+    {
+      "label": "DEMOHAL",
+      "count": 1
+    },
+    {
+      "label": "DemoAdmin1!",
+      "count": 1
+    },
+    {
+      "label": "DemoNew3!",
+      "count": 1
+    },
+    {
+      "label": "DemoOld6!",
+      "count": 1
+    },
+    {
+      "label": "DemoShared2!",
+      "count": 1
+    }
+  ],
+  "account_risk": {
+    "schema": "perp.account-risk.v1",
+    "snapshot_time": "2026-11-25T12:00:00+00:00",
+    "sources": [
+      {
+        "id": "inventory-001",
+        "path": "synthetic/accounts.ntds",
+        "sha256": "eefee953c92aca6364cbb3c3fd689435c89df18b059bb167e9d23af7341482df",
+        "records": 11,
+        "format": "ntds-text"
+      },
+      {
+        "id": "directory-context",
+        "path": "synthetic/directory.csv",
+        "sha256": "93011f18475efb268f4940e45d0aa73386abbbbae94d92489cbd38f81e22a061",
+        "format": "directory-csv",
+        "records": 5
+      }
+    ],
+    "accounts": [
+      {
+        "id": "account-0001",
+        "account": "EXAMPLE.TEST\\lab-admin",
+        "name": "lab-admin",
+        "domain": "EXAMPLE.TEST",
+        "rid": 500,
+        "status": "Enabled",
+        "status_source": "inventory",
+        "has_current": true,
+        "kind": "built-in Administrator",
+        "directory_account_type": "user",
+        "privileged": true,
+        "service_account": false,
+        "asset": "example-directory",
+        "owner": "Example IAM team",
+        "pwd_last_set": "2026-09-01T00:00:00+00:00",
+        "password_never_expires": false,
+        "account_expires": null,
+        "last_logon": null,
+        "current_nt_recovered": true,
+        "current_nt_assessed": true,
+        "recovery_basis": "verified NT password",
+        "lm_present": false,
+        "lm_recovery": "Not stored / placeholder",
+        "record_refs": [
+          {
+            "source_id": "inventory-001",
+            "line": 1
+          }
+        ],
+        "recovery_evidence": [
+          {
+            "source": "synthetic/recovery.potfile",
+            "line": 1,
+            "method": "NT hash verified"
+          }
+        ],
+        "risk_flags": [
+          "enabled_current_recovered",
+          "privileged_current_recovered"
+        ],
+        "password_age_days": 85
+      },
+      {
+        "id": "account-0002",
+        "account": "EXAMPLE.TEST\\app-service",
+        "name": "app-service",
+        "domain": "EXAMPLE.TEST",
+        "rid": 1001,
+        "status": "Enabled",
+        "status_source": "inventory",
+        "has_current": true,
+        "kind": "Service account (directory)",
+        "directory_account_type": "service",
+        "privileged": false,
+        "service_account": true,
+        "asset": "example-app",
+        "owner": "Example app team",
+        "pwd_last_set": "2026-08-01T00:00:00+00:00",
+        "password_never_expires": true,
+        "account_expires": null,
+        "last_logon": null,
+        "current_nt_recovered": true,
+        "current_nt_assessed": true,
+        "recovery_basis": "verified NT password",
+        "lm_present": false,
+        "lm_recovery": "Not stored / placeholder",
+        "record_refs": [
+          {
+            "source_id": "inventory-001",
+            "line": 2
+          }
+        ],
+        "recovery_evidence": [
+          {
+            "source": "synthetic/recovery.potfile",
+            "line": 2,
+            "method": "NT hash verified"
+          }
+        ],
+        "risk_flags": [
+          "enabled_current_recovered",
+          "enabled_disabled_reuse",
+          "service_account_current_recovered",
+          "shared_current_credential"
+        ],
+        "password_age_days": 116
+      },
+      {
+        "id": "account-0003",
+        "account": "EXAMPLE.TEST\\retired-user",
+        "name": "retired-user",
+        "domain": "EXAMPLE.TEST",
+        "rid": 1002,
+        "status": "Disabled",
+        "status_source": "inventory",
+        "has_current": true,
+        "kind": "User (directory)",
+        "directory_account_type": "user",
+        "privileged": false,
+        "service_account": false,
+        "asset": "example-directory",
+        "owner": "Example IAM team",
+        "pwd_last_set": null,
+        "password_never_expires": null,
+        "account_expires": null,
+        "last_logon": null,
+        "current_nt_recovered": true,
+        "current_nt_assessed": true,
+        "recovery_basis": "verified NT password",
+        "lm_present": true,
+        "lm_recovery": "One half matched",
+        "record_refs": [
+          {
+            "source_id": "inventory-001",
+            "line": 3
+          }
+        ],
+        "recovery_evidence": [
+          {
+            "source": "synthetic/recovery.potfile",
+            "line": 2,
+            "method": "NT hash verified"
+          }
+        ],
+        "risk_flags": [
+          "disabled_current_recovered",
+          "enabled_disabled_reuse",
+          "lm_material_present",
+          "shared_current_credential"
+        ],
+        "password_age_days": null
+      },
+      {
+        "id": "account-0004",
+        "account": "EXAMPLE.TEST\\current-user",
+        "name": "current-user",
+        "domain": "EXAMPLE.TEST",
+        "rid": 1003,
+        "status": "Enabled",
+        "status_source": "inventory",
+        "has_current": true,
+        "kind": "User (directory)",
+        "directory_account_type": "user",
+        "privileged": false,
+        "service_account": false,
+        "asset": "example-directory",
+        "owner": "Example IAM team",
+        "pwd_last_set": null,
+        "password_never_expires": null,
+        "account_expires": null,
+        "last_logon": null,
+        "current_nt_recovered": true,
+        "current_nt_assessed": true,
+        "recovery_basis": "verified NT password",
+        "lm_present": false,
+        "lm_recovery": "Not stored / placeholder",
+        "record_refs": [
+          {
+            "source_id": "inventory-001",
+            "line": 4
+          }
+        ],
+        "recovery_evidence": [
+          {
+            "source": "synthetic/recovery.potfile",
+            "line": 3,
+            "method": "NT hash verified"
+          }
+        ],
+        "risk_flags": [
+          "enabled_current_recovered",
+          "history_to_current_reuse"
+        ],
+        "password_age_days": null
+      },
+      {
+        "id": "account-0005",
+        "account": "EXAMPLE.TEST\\unclassified",
+        "name": "unclassified",
+        "domain": "EXAMPLE.TEST",
+        "rid": 1004,
+        "status": "Unknown",
+        "status_source": "unknown",
+        "has_current": true,
+        "kind": "account",
+        "directory_account_type": null,
+        "privileged": null,
+        "service_account": null,
+        "asset": "",
+        "owner": "",
+        "pwd_last_set": null,
+        "password_never_expires": null,
+        "account_expires": null,
+        "last_logon": null,
+        "current_nt_recovered": false,
+        "current_nt_assessed": true,
+        "recovery_basis": "not recovered in supplied results",
+        "lm_present": false,
+        "lm_recovery": "Not stored / placeholder",
+        "record_refs": [
+          {
+            "source_id": "inventory-001",
+            "line": 5
+          }
+        ],
+        "recovery_evidence": [],
+        "risk_flags": [],
+        "password_age_days": null
+      },
+      {
+        "id": "account-0006",
+        "account": "EXAMPLE.TEST\\empty-disabled",
+        "name": "empty-disabled",
+        "domain": "EXAMPLE.TEST",
+        "rid": 1005,
+        "status": "Disabled",
+        "status_source": "inventory",
+        "has_current": true,
+        "kind": "account",
+        "directory_account_type": null,
+        "privileged": null,
+        "service_account": null,
+        "asset": "",
+        "owner": "",
+        "pwd_last_set": null,
+        "password_never_expires": null,
+        "account_expires": null,
+        "last_logon": null,
+        "current_nt_recovered": true,
+        "current_nt_assessed": true,
+        "recovery_basis": "known empty",
+        "lm_present": false,
+        "lm_recovery": "Not stored / placeholder",
+        "record_refs": [
+          {
+            "source_id": "inventory-001",
+            "line": 6
+          }
+        ],
+        "recovery_evidence": [
+          {
+            "method": "known empty NT password"
+          }
+        ],
+        "risk_flags": [
+          "disabled_current_recovered",
+          "known_empty_current_password"
+        ],
+        "password_age_days": null
+      },
+      {
+        "id": "account-0007",
+        "account": "EXAMPLE.TEST\\DCX$",
+        "name": "DCX$",
+        "domain": "EXAMPLE.TEST",
+        "rid": 1006,
+        "status": "Enabled",
+        "status_source": "inventory",
+        "has_current": true,
+        "kind": "Computer (directory)",
+        "directory_account_type": "computer",
+        "privileged": false,
+        "service_account": false,
+        "asset": "example-directory",
+        "owner": "Example IAM team",
+        "pwd_last_set": null,
+        "password_never_expires": null,
+        "account_expires": null,
+        "last_logon": null,
+        "current_nt_recovered": false,
+        "current_nt_assessed": true,
+        "recovery_basis": "not recovered in supplied results",
+        "lm_present": false,
+        "lm_recovery": "Not stored / placeholder",
+        "record_refs": [
+          {
+            "source_id": "inventory-001",
+            "line": 7
+          }
+        ],
+        "recovery_evidence": [],
+        "risk_flags": [],
+        "password_age_days": null
+      }
+    ],
+    "history": [
+      {
+        "account_id": "account-0001",
+        "account": "EXAMPLE.TEST\\lab-admin",
+        "current_status": "Enabled",
+        "history_index": 0,
+        "overlaps_current": true,
+        "nt_recovered": true,
+        "nt_assessed": true,
+        "lm_recovery": "Not stored / placeholder",
+        "record_refs": [
+          {
+            "source_id": "inventory-001",
+            "line": 8
+          }
+        ]
+      },
+      {
+        "account_id": "account-0003",
+        "account": "EXAMPLE.TEST\\retired-user",
+        "current_status": "Disabled",
+        "history_index": 0,
+        "overlaps_current": false,
+        "nt_recovered": true,
+        "nt_assessed": true,
+        "lm_recovery": "Not stored / placeholder",
+        "record_refs": [
+          {
+            "source_id": "inventory-001",
+            "line": 9
+          }
+        ]
+      },
+      {
+        "account_id": "account-0003",
+        "account": "EXAMPLE.TEST\\retired-user",
+        "current_status": "Disabled",
+        "history_index": 1,
+        "overlaps_current": false,
+        "nt_recovered": true,
+        "nt_assessed": true,
+        "lm_recovery": "Not stored / placeholder",
+        "record_refs": [
+          {
+            "source_id": "inventory-001",
+            "line": 10
+          }
+        ]
+      },
+      {
+        "account_id": "account-0007",
+        "account": "EXAMPLE.TEST\\DCX$",
+        "current_status": "Enabled",
+        "history_index": 0,
+        "overlaps_current": false,
+        "nt_recovered": false,
+        "nt_assessed": true,
+        "lm_recovery": "Not stored / placeholder",
+        "record_refs": [
+          {
+            "source_id": "inventory-001",
+            "line": 11
+          }
+        ]
+      }
+    ],
+    "reuse_groups": [
+      {
+        "id": "reuse-001",
+        "current_accounts": [
+          "account-0002",
+          "account-0003"
+        ],
+        "historical_accounts": [],
+        "enabled_current_accounts": [
+          "account-0002"
+        ],
+        "disabled_current_accounts": [
+          "account-0003"
+        ],
+        "password_known": true
+      },
+      {
+        "id": "reuse-002",
+        "current_accounts": [
+          "account-0004"
+        ],
+        "historical_accounts": [
+          "account-0003"
+        ],
+        "enabled_current_accounts": [
+          "account-0004"
+        ],
+        "disabled_current_accounts": [],
+        "password_known": true
+      }
+    ],
+    "by_status": [
+      {
+        "status": "Enabled",
+        "accounts": 4,
+        "assessed": 4,
+        "recovered": 3,
+        "not_recovered": 1,
+        "not_assessed": 0,
+        "recovery_rate": 0.75
+      },
+      {
+        "status": "Disabled",
+        "accounts": 2,
+        "assessed": 2,
+        "recovered": 2,
+        "not_recovered": 0,
+        "not_assessed": 0,
+        "recovery_rate": 1.0
+      },
+      {
+        "status": "Unknown",
+        "accounts": 1,
+        "assessed": 1,
+        "recovered": 0,
+        "not_recovered": 1,
+        "not_assessed": 0,
+        "recovery_rate": 0.0
+      }
+    ],
+    "metrics": {
+      "current_accounts": 7,
+      "history_only_accounts": 0,
+      "current_accounts_recovered": 5,
+      "history_records": 4,
+      "current_history_overlaps": 1,
+      "historical_records_assessed": 3,
+      "historical_records_recovered": 2,
+      "current_lm_present": 1,
+      "current_reuse_groups": 1,
+      "enabled_disabled_reuse_groups": 1,
+      "history_to_current_reuse_groups": 1,
+      "invalid_nt_recovery_claims": 0,
+      "undecodable_recovery_records": 0,
+      "seed_records_excluded_newlines": 0
+    },
+    "limitations": [
+      "Status describes the supplied inventory, not live authentication.",
+      "History indices are exporter positions, not dated password changes.",
+      "LM key matches are not independent LM verification or current NT recovery.",
+      "History/current overlaps are excluded from historical recovery totals.",
+      "Unqualified identities are scoped to their inventory file unless a domain is supplied."
+    ]
+  },
+  "candidate_seeds_exported": false,
+  "excel_export": true
+}

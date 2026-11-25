@@ -43,6 +43,30 @@ matches an ambiguous basename or guesses account names from password text.
 
 ## Findings
 
+### Account-aware perp 1.1 results
+
+When `summary.json` includes `perp.account-risk.v1` analysis, the standalone helper
+also prepares drafts for enabled current-password exposure, current reuse across
+enabled/disabled accounts, historical/current reuse affecting enabled accounts,
+and krbtgt exposure. It consumes only safe account fields and inventory source
+aliases/digests; it does not copy raw inventory hashes, passwords, local paths,
+or seed lists into the bundle. Current status is a supplied snapshot, not live
+authentication evidence. Source role flags must be explicitly confirmed.
+
+LM storage can be established by non-placeholder LM material in a typed current
+inventory record. It does not require an NT password recovery. Partial LM key
+matches do not establish the current case-sensitive NT password. History records
+overlapping their own current hash are excluded from historical reuse analysis.
+
+Privileged/service-password drafts from inventory analysis require a known
+current NT password, Enabled status, and the corresponding confirmed role.
+Unknown-status recoveries and missing in-scope asset mappings become review checks.
+No disabled/history-only record is promoted to an enabled credential finding.
+krbtgt exposure has separate domain-response guidance; do not recommend enabling
+that account because its disabled flag is present.
+
+### Legacy explicit context CSV
+
 - **Active LAN Manager password hash storage** requires `hash_type=LM`,
   `lm_storage_confirmed=true`, and a recovered audit record. Recommend enabling
   the applicable NoLMHash policy, coordinating password changes, and verifying

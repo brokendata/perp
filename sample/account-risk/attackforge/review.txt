@@ -1,0 +1,34 @@
+perp to AttackForge: local review bundle
+Bundle: 69dc5adfd4ed016b5c934984ab68d9aaa784901c286fa7291da041a782013425
+Recovered records: 5
+Draft findings: 6
+
+No upload has been performed. Review project scope, roles, severity, assets, and images.
+
+Recovered current passwords on enabled accounts
+Suggested severity: High (review required)
+Validate current status, coordinate credential rotation, review reuse and sign-in activity, and apply appropriate access controls.
+
+Shared credentials across enabled and disabled accounts
+Suggested severity: High (review required)
+Remove credential reuse, coordinate rotation of affected enabled credentials, and review account lifecycle controls.
+
+Historical credentials reused by enabled accounts
+Suggested severity: High (review required)
+Coordinate replacement of reused credentials, review cross-account reuse, and protect historical directory credential material.
+
+Active LAN Manager password hash storage
+Suggested severity: Medium (review required)
+Enable the applicable Network security: Do not store LAN Manager hash value on next password change policy. Validate legacy compatibility, coordinate password changes to remove stored LM representations, and verify removal after policy application and replication.
+
+Recoverable privileged-account passwords
+Suggested severity: High (review required)
+Coordinate rotation of exposed privileged credentials. Review reuse and relevant sign-in activity, separate privileged and ordinary credentials, and enforce appropriate MFA and privileged-access controls.
+
+Recoverable service-account passwords
+Suggested severity: Medium (review required)
+Coordinate credential rotation with service owners and update every dependent service, scheduled task, and secret store. Prefer managed service accounts or managed identities where supported, and restrict permissions to required functions.
+
+Outstanding context checks: 2
+Generated summary.svg is a graphic, not a screenshot.
+Do not attach the ordinary perp report or raw CSV/potfiles without explicit sensitive-data scope.

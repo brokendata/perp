@@ -53,7 +53,7 @@ function render() {
   for (const row of selected.slice(page * pageSize, (page + 1) * pageSize)) {
     const tr = document.createElement('tr');
     const type = row.hash_type || 'Unknown / ambiguous';
-    const values = [row.password || '(empty)', row.byte_length, row.mask || '(empty)', type + (row.hash_type_basis === 'declared' ? ' (declared)' : ''), row.source + ' : ' + row.line];
+    const values = [row.password || '(empty)', row.byte_length, row.mask || '(empty)', type + (['declared', 'inventory'].includes(row.hash_type_basis) ? ` (${row.hash_type_basis})` : ''), row.source + ' : ' + row.line];
     const labels = ['Password', 'Bytes', 'Mask', 'Hash / credential type', 'Source : line'];
     values.forEach((value, index) => {
       const cell = document.createElement(index === 0 ? 'th' : 'td');

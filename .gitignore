@@ -19,6 +19,14 @@ password_report.xlsx
 masks.csv
 HashcatMasks.txt
 HashcatMasks.hcmask
+account_risk.json
+accounts.csv
+password_history.csv
+credential_reuse.csv
+candidate_seeds.txt
+*.dit
+*.ntds
+/inputs/
 
 # Reviewed public-dictionary demonstration only
 !/sample/passwords.csv
@@ -28,6 +36,17 @@ HashcatMasks.hcmask
 !/sample/masks.csv
 !/sample/HashcatMasks.txt
 !/sample/HashcatMasks.hcmask
+!/sample/account-risk/account_risk.json
+!/sample/account-risk/accounts.csv
+!/sample/account-risk/password_history.csv
+!/sample/account-risk/credential_reuse.csv
+!/sample/account-risk/passwords.csv
+!/sample/account-risk/summary.json
+!/sample/account-risk/password_report.html
+!/sample/account-risk/password_report.xlsx
+!/sample/account-risk/masks.csv
+!/sample/account-risk/HashcatMasks.txt
+!/sample/account-risk/HashcatMasks.hcmask
 
 # Local credentials
 .env

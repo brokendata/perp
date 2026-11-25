@@ -10,13 +10,14 @@ ROOT = Path(__file__).resolve().parents[1]
 FILES = (
     '.gitignore', 'README.md', 'CHANGELOG.md', 'WORDLISTS.md',
     'perp.py', 'potfile_parser.py', 'hash_types.py', 'dashboard_renderer.py', 'excel_export.py',
+    'account_inventory.py', 'account_dashboard.py', 'docs/account-inventory.md', 'scripts/build_account_sample.py',
     'attackforge_export.py', 'requirements-excel.txt', 'scripts/prepare_release.py',
     'web/logo.txt', 'web/dashboard.html', 'web/dashboard.css',
-    'web/dashboard.js', 'web/charts.js',
+    'web/dashboard.js', 'web/charts.js', 'web/accounts.js',
     'tests/test_perp.py', 'tests/test_potfile_parser.py', 'tests/test_hash_types.py',
     'tests/test_excel_export.py', 'tests/test_dashboard_charts.py',
     'tests/test_attackforge_export.py', 'tests/check_dashboard.cjs',
-    'tests/check_charts.cjs',
+    'tests/check_charts.cjs', 'tests/test_account_inventory.py', 'tests/check_accounts.cjs',
     'skills/perp-attackforge/SKILL.md',
     'skills/perp-attackforge/agents/openai.yaml',
     'skills/perp-attackforge/references/connections.md',
@@ -28,6 +29,15 @@ FILES = (
     'sample/attackforge/bundle.json', 'sample/attackforge/review.txt',
     'sample/attackforge/evidence/summary.svg',
     'docs/screenshots/dashboard-light.png', 'docs/screenshots/dashboard-dark.png',
+    'docs/screenshots/account-risk-light.png', 'docs/screenshots/account-risk-dark.png',
+    'sample/account-risk/README.md', 'sample/account-risk/password_report.html',
+    'sample/account-risk/password_report.xlsx', 'sample/account-risk/summary.json',
+    'sample/account-risk/passwords.csv', 'sample/account-risk/masks.csv',
+    'sample/account-risk/HashcatMasks.hcmask', 'sample/account-risk/HashcatMasks.txt',
+    'sample/account-risk/accounts.csv', 'sample/account-risk/account_risk.json',
+    'sample/account-risk/password_history.csv', 'sample/account-risk/credential_reuse.csv',
+    'sample/account-risk/attackforge/bundle.json', 'sample/account-risk/attackforge/review.txt',
+    'sample/account-risk/attackforge/evidence/summary.svg',
 )
 
 

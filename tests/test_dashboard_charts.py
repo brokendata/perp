@@ -32,6 +32,14 @@ class DashboardChartTests(unittest.TestCase):
         rendered = chart("Overlapping", [{"label": "Upper", "count": 4}, {"label": "Lower", "count": 4}], 4)
         self.assertNotIn('donut-chart', rendered)
 
+    def test_mask_key_is_contextual_native_disclosure(self):
+        rendered = chart('Most frequent masks', [{'label': '?u?d', 'count': 1}], 1, pie=True, mask_help=True)
+        self.assertIn('<details class="mask-help" id="mask-key">', rendered)
+        self.assertIn('<summary>Mask key', rendered)
+        for token in ('?u', '?l', '?d', '?s', '?b'):
+            self.assertIn('<code>'+token+'</code>', rendered)
+        self.assertNotIn('mask-help', chart('Other chart', [], 0))
+
     @unittest.skipUnless(shutil.which("node"), "Node.js is optional for interaction tests")
     def test_interactions(self):
         root = Path(__file__).resolve().parent.parent

@@ -18,8 +18,24 @@ BOOL_FIELDS = ('privileged', 'service_account', 'lm_storage_confirmed', 'recover
 REQUIRED = {'source', 'line', 'account', 'asset'}
 LM_REFERENCE = 'https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/network-security-do-not-store-lan-manager-hash-value-on-next-password-change'
 RULES = {
+    'enabled-credentials': ('Recovered current passwords on enabled accounts', 'High',
+        'Offline verification identifies current NT passwords for accounts marked enabled in the supplied inventory.',
+        'Known credentials may expose accounts where access policy permits their use; no live authentication was tested.',
+        'Validate current status, coordinate credential rotation, review reuse and sign-in activity, and apply appropriate access controls.', []),
+    'cross-status-reuse': ('Shared credentials across enabled and disabled accounts', 'High',
+        'Identical current NT hashes occur on enabled and disabled inventory accounts.',
+        'Exposure of a disabled account credential can expose an enabled account sharing its credential material.',
+        'Remove credential reuse, coordinate rotation of affected enabled credentials, and review account lifecycle controls.', []),
+    'history-current-reuse': ('Historical credentials reused by enabled accounts', 'High',
+        'Historical NT material matches a current NT hash on an enabled account; own-current history overlaps are excluded.',
+        'Exposure of password history can expose current credentials on other accounts.',
+        'Coordinate replacement of reused credentials, review cross-account reuse, and protect historical directory credential material.', []),
+    'krbtgt-exposure': ('Known current krbtgt password material', 'High',
+        'Offline verification identifies the current NT password of an inventory account with krbtgt RID 502.',
+        'Exposed krbtgt credential material requires domain-level incident review regardless of the disabled flag.',
+        'Escalate to domain incident responders and follow the established krbtgt recovery and rotation procedure. Do not enable the account as a remediation.', []),
     'lm-storage': ('Active LAN Manager password hash storage', 'Medium',
-        'Confirmed account context identifies active LM hash storage associated with recovered audit records.',
+        'Supplied account context or typed inventory identifies non-placeholder LM password hash storage.',
         'LM password representations can make offline recovery substantially easier after hash exposure.',
         'Enable the applicable Network security: Do not store LAN Manager hash value on next password change policy. Validate legacy compatibility, coordinate password changes to remove stored LM representations, and verify removal after policy application and replication.', [LM_REFERENCE]),
     'privileged-passwords': ('Recoverable privileged-account passwords', 'High',
@@ -83,7 +99,7 @@ def load_context(path, records, sources):
                     hash_type = 'LM'
                 mapped.append({'account': account, 'asset': asset, 'hash_type': hash_type,
                                'record_ref': {'source_id': source_info['id'], 'line': line},
-                               'recovered_audit_record': source_info['format'] in ('potfile', 'hashcat', 'john') or flags['recovery_confirmed'] is True,
+                               'recovered_audit_record': source_info['format'] in ('potfile', 'hashcat', 'john', 'hashcat-show') or flags['recovery_confirmed'] is True,
                                **flags})
             except (ValueError, KeyError, TypeError, AttributeError) as error:
                 raise ValueError(f'Account CSV row {number}: {error}') from error
@@ -144,6 +160,38 @@ def build_bundle(results, context_path=None, evidence_paths=(), output=None):
             groups['service-passwords'].append(account)
         if account['privileged'] is None and account['service_account'] is None and re.search(r'admin|svc|service', account['account'], re.I):
             checks.append({'account': account['account'], 'asset': account['asset'], 'reason': 'Name hint only; confirm the actual privileged/service role'})
+    inventory_sources = []
+    risk = summary.get('account_risk')
+    if risk:
+        if risk.get('schema') != 'perp.account-risk.v1':
+            raise ValueError('Unsupported account-risk schema')
+        inventory_sources = [{key: source[key] for key in ('id', 'format', 'sha256', 'records')} for source in risk['sources']]
+        for item in risk['accounts']:
+            account = {'account': item['account'], 'asset': item['asset'], 'status': item['status'],
+                       'hash_type': 'NTLM', 'privileged': item['privileged'], 'service_account': item['service_account'],
+                       'current_nt_recovered': item['current_nt_recovered'], 'lm_storage_confirmed': item['lm_present'],
+                       'inventory_record_refs': item['record_refs'], 'snapshot_time': risk['snapshot_time']}
+            accounts.append(account)
+            if not item['has_current']:
+                continue
+            if not item['asset']:
+                checks.append({'account': item['account'], 'asset': '', 'reason': 'Map to an in-scope AttackForge asset before publication'})
+            if item['lm_present'] is True:
+                groups['lm-storage'].append(account)
+            if item['current_nt_recovered'] and item['status'] == 'Enabled':
+                groups['enabled-credentials'].append(account)
+                if item['privileged'] is True:
+                    groups['privileged-passwords'].append(account)
+                if item['service_account'] is True:
+                    groups['service-passwords'].append(account)
+            if 'enabled_disabled_reuse' in item['risk_flags']:
+                groups['cross-status-reuse'].append(account)
+            if 'history_to_current_reuse' in item['risk_flags'] and item['status'] == 'Enabled':
+                groups['history-current-reuse'].append(account)
+            if 'krbtgt_credential_exposure' in item['risk_flags']:
+                groups['krbtgt-exposure'].append(account)
+            if item['current_nt_recovered'] and item['status'] == 'Unknown':
+                checks.append({'account': item['account'], 'asset': item['asset'], 'reason': 'Current password known, but current enabled/disabled status is unknown'})
     findings = []
     for code, affected in groups.items():
         if not affected:
@@ -152,20 +200,24 @@ def build_bundle(results, context_path=None, evidence_paths=(), output=None):
         findings.append({'external_id': 'perp:'+code, 'title': title, 'severity_suggestion': severity,
                          'description': description, 'impact': impact, 'remediation': remediation,
                          'references': references, 'affected_accounts': affected,
-                         'affected_assets': sorted({account['asset'] for account in affected}),
+                         'affected_assets': sorted({account['asset'] for account in affected if account['asset']}),
                          'evidence_refs': ['aggregate-summary'], 'review_required': True})
     metrics = {'total_records': summary['total'], 'unique_passwords': summary['unique'],
                'duplicate_records': summary['duplicate_records'], 'empty_passwords': summary['empty_passwords'],
                'account_mappings': len(accounts)}
     bundle = {'schema': SCHEMA, 'tool': 'perp', 'version': summary['version'], 'created': summary['created'],
               'publication_status': 'requires_consultant_review', 'metrics': metrics,
-              'sources': list(sources.values()), 'findings': findings, 'review_checks': checks,
+              'sources': list(sources.values())+inventory_sources, 'findings': findings, 'review_checks': checks,
               'evidence': [], 'privacy': {'password_fields_omitted': True, 'supplied_images_require_review': True},
               'limitations': ['Input records are not unique accounts or an account crack rate.',
                              'No privilege, service role, or hash type is inferred from password values.',
                              'This is a portable review bundle, not an AttackForge-native import schema.']}
     if not accounts:
         bundle['limitations'].append('No account context supplied; no account-specific vulnerabilities were generated.')
+    if risk:
+        metrics.update(inventory_current_accounts=risk['metrics']['current_accounts'],
+                       enabled_current_passwords_known=next(row['recovered'] for row in risk['by_status'] if row['status'] == 'Enabled'))
+        bundle['limitations'].append('Status and roles describe supplied context; no live login was tested. Inventory findings may overlap and require review.')
     evidence = []
     for path in evidence_paths:
         path = Path(path).resolve()

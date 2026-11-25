@@ -1,5 +1,9 @@
 # Public wordlist demonstration
 
+For the v1.1 account-aware workflow, see the separate
+[synthetic account demonstration](account-risk/README.md). This wordlist example
+remains a standalone v1.0 password-pattern report.
+
 This v1.0 report uses a restored 10,000-entry excerpt of the public RockYou
 dictionary. It is not an engagement report, identified accounts, or an account
 crack-rate measurement. The full wordlist and archive are not included; see

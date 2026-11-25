@@ -9,15 +9,16 @@ patterns contained in them. Plaintext password lists are supported too.
 
 [🚀 Quick start](#quick-start) · [⚙️ Options](#options) · [📊 Screenshots](#see-it-in-action) · [🔗 AttackForge](#attackforge) · [📜 History](#history)
 
-## Release 1.0
+## Release 1.1
 
-The first Python release brings offline reporting to Linux, macOS, and Windows.
-Requires Python 3.10+.
+Account-aware password reporting, offline on Linux, macOS, and Windows.
+Requires Python 3.10+; Excel export remains optional.
 
-- 📊 **Explore patterns:** interactive donut charts, hash/credential types, character-set profiles, password lengths, frequent passwords, and masks.
-- 🎨 **Make it yours:** System, Light, and Dark themes, searchable records, and clickable chart legends.
-- 📁 **Take the results with you:** standalone HTML, Excel, CSV, JSON, and Hashcat masks.
-- 🔗 **Feed your workflow:** multiple files, directory scanning, timestamped results, and AttackForge review bundles.
+- 📊 **Measure exposure:** enabled, disabled, and unknown-status account recovery, with current/history separation.
+- 🔎 **Find reuse:** shared current credentials, disabled-to-enabled links, and historical-to-current matches.
+- 📁 **Keep the evidence:** LM-half tracking, confirmed directory roles, CSV/JSON exports, and account sheets in Excel.
+- 🔗 **Continue the assessment:** explicit candidate-seed exports and account-aware AttackForge drafts.
+- 🎨 **Explore the patterns:** interactive offline charts, record search, light/dark themes, and Hashcat masks.
 
 [Full changelog](CHANGELOG.md)
 
@@ -113,6 +114,36 @@ python3 ./perp.py ./ntlm.potfile --format hashcat --hash-type NTLM
 
 RockYou is available separately; see [External wordlists](WORDLISTS.md).
 
+## Account inventory workflow
+
+Provide a complete **NTDS/secretsdump text export** as the baseline, then add
+potfiles or recovered-password lists. The inventory supplies names, LM/NT fields,
+status, and optional history; passwords are verified offline against NT hashes.
+Binary `NTDS.dit` requires separate extraction.
+
+```bash
+# Inventory-only overview
+python3 ./perp.py --inventory /path/to/accounts.ntds --output-root ./reports
+
+# Correlate recoveries, with optional directory metadata
+python3 ./perp.py ./hashcat.potfile --format hashcat --inventory /path/to/accounts.ntds --directory-context ./directory.csv --excel --attackforge
+
+# Hashcat's default username:hash:password show export
+python3 ./perp.py ./show.txt --format hashcat-show --inventory /path/to/accounts.ntds
+
+# Explicitly export deduplicated seeds for a further recovery round
+python3 ./perp.py ./hashcat.potfile --inventory /path/to/accounts.ntds --export-seeds
+```
+
+For the best results, include enabled/disabled status, a snapshot timestamp, and
+directory metadata confirming roles, ownership, and password age. Missing status
+stays Unknown. History overlaps and LM halves do not inflate current NT recovery.
+Seed exports can include partial LM components; they are not all verified current
+passwords, and no cracking tool is launched.
+
+[Input formats, directory CSV, and correlation rules](docs/account-inventory.md) ·
+[Synthetic v1.1 account dashboard](sample/account-risk/README.md)
+
 ## Options
 
 ```text
@@ -121,10 +152,15 @@ python3 perp.py INPUT [INPUT ...] [OPTIONS]
 
 | Argument / option | Purpose | Default |
 | --- | --- | --- |
-| `INPUT [INPUT ...]` | One or more files, directories, or quoted wildcard patterns. | Required |
+| `INPUT [INPUT ...]` | Recovery files, directories, or quoted wildcard patterns. | Required unless `--inventory` is supplied |
 | `-r`, `--recursive` | Include subdirectories when scanning directories. | Off |
 | `-o PATH`, `--output-root PATH` | Create a new timestamped result folder under this path. | Current directory |
-| `--format FORMAT` | Input dialect: `auto`, `plaintext`, `potfile`, `hashcat`, or `john`. | `auto` |
+| `--format FORMAT` | Input dialect: `auto`, `plaintext`, `potfile`, `hashcat`, `john`, or `hashcat-show`. | `auto` |
+| `--inventory FILE` | NTDS/secretsdump text inventory; repeatable. | None |
+| `--inventory-domain DOMAIN` | Domain scope for unqualified inventory names. | Separate scope per file |
+| `--directory-context CSV` | Confirmed account roles, status, assets, owners, and timestamps, joined by domain/RID. | None |
+| `--snapshot-time ISO` | Inventory snapshot timestamp with timezone; enables password-age calculation. | Unknown |
+| `--export-seeds` | Write sensitive local candidate seeds; requires `--inventory`. | Off |
 | `--hash-type TYPE` | Label otherwise unidentified potfile hashes, e.g. `NTLM`, `LM`, `MD5`, or any custom name. Recognized signatures and plaintext are unchanged. | `auto` |
 | `--encoding NAME` | Input text/display encoding, such as `utf-8`, `latin-1`, or `cp1252`. | `utf-8` |
 | `--separator TEXT` | Delimiter between potfile fields. | `:` |
@@ -145,6 +181,7 @@ python3 perp.py INPUT [INPUT ...] [OPTIONS]
 | `potfile` | Recognized Kerberos and NetNTLM layouts, or unambiguous `hash:password` records. |
 | `hashcat` | Canonical Hashcat potfiles, including internal hash separators and `$HEX[]` passwords. |
 | `john` | John potfiles supported by the conservative parser; custom layouts need an explicit override. |
+| `hashcat-show` | Default `--show --username` export, with username prefix and hash/password output. |
 
 Ambiguous multi-field records fail rather than guessing. Use `hashcat` only for
 genuine potfiles, not arbitrary `--show` exports. For a known `hash:salt:password`
@@ -159,8 +196,8 @@ Use an ASCII-compatible encoding; convert UTF-16/32 input to UTF-8 first.
 
 The dashboard and Excel workbook include a type distribution chart and a full
 count/share table. The record explorer can search by type; detailed CSV records
-include `hash_type` and `hash_type_basis` (`signature`, `declared`, `unknown`, or
-`plaintext`). Summary JSON includes `hash_types` and identification-basis counts.
+include `hash_type` and `hash_type_basis` (`signature`, `declared`, `inventory`,
+`unknown`, or `plaintext`). Summary JSON includes `hash_types` and identification-basis counts.
 
 Automatic recognition covers supported Kerberos and NetNTLM layouts, tagged NTLM
 and LM, bcrypt, Unix crypt variants, Argon2, scrypt, PBKDF2, phpass, DCC2, and
@@ -177,6 +214,17 @@ Counts describe recovered input records, including repeated records and LM
 halves, rather than accounts, full LM passwords, or an overall crack rate.
 
 ## See it in action
+
+### Account exposure · v1.1
+
+The [synthetic account sample](sample/account-risk/README.md) demonstrates
+status-based recovery, credential reuse, LM evidence, and password history.
+
+![Account exposure dashboard in light mode](docs/screenshots/account-risk-light.png)
+
+![Account exposure dashboard in dark mode](docs/screenshots/account-risk-dark.png)
+
+### Password patterns
 
 The [sample report](sample/README.md) explores 10,000 public RockYou entries and
 150 distinct masks. Download the project and open the
@@ -210,6 +258,9 @@ counter (`-2`, `-3`, etc.) to keep earlier results intact.
 | `HashcatMasks.txt` | Compatibility copy of the masks. |
 | `summary.json` | Aggregate distributions, top passwords, and input provenance. |
 | `attackforge/` | Optional review bundle and evidence (`--attackforge`). |
+| `account_risk.json`, `accounts.csv` | Account exposure and provenance (`--inventory`); no raw inventory hashes. |
+| `password_history.csv`, `credential_reuse.csv` | History/overlap tracking and reuse relationships (`--inventory`). |
+| `candidate_seeds.txt` | Sensitive candidate material, only with `--export-seeds`. |
 
 Masks preserve byte order: `Ab9!z` becomes `?u?l?d?s?l`. Non-ASCII/control bytes
 use `?b` per byte. Counts describe input records, not total accounts or a crack rate.
@@ -250,6 +301,11 @@ graphic, and supplied images. Password and hash values are omitted from the
 JSON/graphic; supplied screenshots still need review for sensitive content.
 The command makes no uploads.
 
+With `--inventory`, account findings feed this bundle automatically, including
+enabled-password exposure and reuse relationships. Confirmed directory roles
+enable privileged/service-account drafts; unknown status and missing asset
+mapping remain review checks. See the [account workflow](docs/account-inventory.md).
+
 To publish through a consultant's connection:
 
 1. Install the [portable skill](skills/perp-attackforge/SKILL.md) in the assistant's skill directory.
@@ -279,3 +335,4 @@ python3 -m unittest discover -s tests -v
 ```
 
 [Changelog](CHANGELOG.md) · [Sample files](sample/README.md) · [External wordlists](WORDLISTS.md)
+

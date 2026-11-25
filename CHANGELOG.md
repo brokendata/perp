@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.1
+
+- Account-inventory mode for NTDS/secretsdump text exports, including enabled,
+  disabled, and unknown status, current records, and password history.
+- Offline NT-password verification with separate recovery rates, current/history
+  overlap handling, shared credentials, and disabled/history-to-enabled reuse.
+- LM placeholder and partial/full key-match reporting without treating LM halves
+  as recovered case-sensitive NT passwords.
+- Optional directory context for confirmed roles, ownership, status, and password
+  age; domain/RID scoping and conflicting-snapshot checks.
+- Account charts, searchable/paginated tables, CSV/JSON exports, and Excel sheets,
+  including inventory-only reports.
+- Hashcat username-aware show input and explicit deduplicated candidate-seed
+  exports for further recovery rounds.
+- Account-aware AttackForge review drafts and a synthetic demonstration dashboard.
+
 ## 1.0
 
 - Python reporting across Kali/Linux, macOS, and Windows, with flexible file,

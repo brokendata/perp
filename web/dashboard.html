@@ -29,6 +29,8 @@
     </nav>
   </header>
   <main class="shell" data-report-revision="3">
+    @@ACCOUNT_RISK@@
+    @@RECOVERY_NOTE@@
     <dl class="metrics">@@METRICS@@</dl>
     <p class="note scope-note">Counts describe recovered input records, including repeats. They are not an account crack rate or a password strength estimate.</p>
     <div class="grid">@@CHARTS@@</div>
@@ -56,12 +58,13 @@
     </section>
   </main>
   <footer class="shell report-footer"><h2>Reading this report</h2>
-    <p>Empty passwords: @@EMPTY_COUNT@@. Masks preserve byte order: <code>?u</code> uppercase, <code>?l</code> lowercase, <code>?d</code> digit, <code>?s</code> printable ASCII symbol/space, <code>?b</code> any byte.</p>
-    <p class="note">Non-ASCII and control bytes use <code>?b</code>. Invalid text and controls are displayed as <code>$HEX[]</code>. CSV prefixes formula-like text with an apostrophe; Summary JSON retains exact display values. Empty passwords have no runnable mask.</p>
+    <p>Empty passwords: @@EMPTY_COUNT@@. Invalid text and control bytes appear as <code>$HEX[]</code>. CSV protects formula-like values with an apostrophe; JSON keeps the original display values.</p>
+    <p>Masks preserve byte order. Empty passwords have no runnable mask.</p>
     <p class="note">All analysis runs locally. This report makes no network requests.</p>
   </footer>
   <template id="data">@@ROWS@@</template>
   <script>@@JS@@</script>
   <script>@@CHART_JS@@</script>
+  <script>@@ACCOUNT_JS@@</script>
 </body>
 </html>

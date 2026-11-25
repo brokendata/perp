@@ -23,11 +23,92 @@ def validate_export(rows, summary):
         for row in data:
             if any(isinstance(value, str) and len(value) > MAX_TEXT for value in row.values()):
                 raise ValueError(f'{name} contains text longer than Excel\'s {MAX_TEXT:,}-character cell limit; omit --excel to preserve it in HTML/JSON/CSV.')
+    risk = summary.get('account_risk')
+    if risk:
+        from account_inventory import account_csv_rows
+        for name, data in [('Accounts', account_csv_rows(risk)), ('History', risk['history']), ('Reuse', risk['reuse_groups'])]:
+            if len(data) >= MAX_ROWS:
+                raise ValueError(f'{name} exceeds Excel row limits; omit --excel')
+            for row in data:
+                if any(len(str(value)) > MAX_TEXT for value in row.values()):
+                    raise ValueError(f'{name} exceeds Excel character cell limit; omit --excel')
+
+
+def write_account_sheets(book, risk):
+    from account_inventory import account_csv_rows
+    header = book.add_format({'bold': True, 'bg_color': '#087966', 'font_color': '#ffffff', 'text_wrap': True})
+    literal = book.add_format({'num_format': '@', 'text_wrap': True, 'valign': 'top'})
+    percent = book.add_format({'num_format': '0.0%'})
+    summary = book.add_worksheet('Account risk')
+    summary.activate()
+    summary.hide_gridlines(2)
+    summary.set_column('A:A', 26)
+    summary.set_column('B:F', 18)
+    summary.merge_range('A1:F1', 'Account exposure · current NT passwords', header)
+    summary.merge_range('A2:F2', 'Snapshot: '+(risk['snapshot_time'] or 'not supplied'))
+    summary.write_row(3, 0, ['Status', 'Accounts', 'NT assessed', 'Passwords known', 'Not assessed', 'Recovery rate'], header)
+    for index, row in enumerate(risk['by_status'], 4):
+        summary.write_row(index, 0, [row['status'], row['accounts'], row['assessed'], row['recovered'], row['not_assessed']])
+        if row['recovery_rate'] is not None:
+            summary.write_formula(index, 5, f'=D{index+1}/C{index+1}', percent, row['recovery_rate'])
+        else:
+            summary.write_string(index, 5, 'Not assessed', literal)
+    chart = book.add_chart({'type': 'column', 'subtype': 'stacked'})
+    for column, name, colour in [(3, 'Current password known', '#ef4444'), (4, 'Not assessed', '#64748b')]:
+        chart.add_series({'name': name, 'categories': ['Account risk', 4, 0, 6, 0],
+                          'values': ['Account risk', 4, column, 6, column], 'fill': {'color': colour}})
+    # Assessed but not recovered is a separate series with an explicit input column.
+    summary.write(3, 6, 'Not recovered', header)
+    summary.set_column('G:G', 18)
+    for index, row in enumerate(risk['by_status'], 4):
+        summary.write_number(index, 6, row['not_recovered'])
+    chart.add_series({'name': 'Not recovered', 'categories': ['Account risk', 4, 0, 6, 0],
+                      'values': ['Account risk', 4, 6, 6, 6], 'fill': {'color': '#f59e0b'}})
+    chart.set_title({'name': 'Current account recovery by status'})
+    chart.set_y_axis({'name': 'Accounts', 'min': 0, 'num_format': '0'})
+    chart.set_size({'width': 690, 'height': 350})
+    summary.insert_chart('A10', chart)
+    summary.merge_range('A29:G31', 'Known passwords are verified offline or identified by the empty NT hash. Status is supplied inventory data, not a live login result. History/current overlaps are excluded from historical recovery totals. LM matches do not establish a current NT password.', literal)
+    for index, (name, value) in enumerate(risk['metrics'].items(), 33):
+        summary.write_string(index, 0, name.replace('_', ' ').title(), literal)
+        summary.write_number(index, 1, value)
+    summary.freeze_panes(4, 1)
+    history = [{key: value for key, value in row.items() if key != 'record_refs'} for row in risk['history']]
+    reuse = [{key: '; '.join(value) if isinstance(value, list) else value for key, value in row.items()} for row in risk['reuse_groups']]
+    for name, rows in [('Accounts', account_csv_rows(risk)), ('History', history), ('Reuse', reuse)]:
+        sheet = book.add_worksheet(name)
+        sheet.hide_gridlines(2)
+        if not rows:
+            sheet.write_string(0, 0, 'No '+name.lower()+' records', header)
+            continue
+        fields = list(rows[0])
+        sheet.add_table(0, 0, len(rows), len(fields)-1, {'name': name+'Inventory', 'style': 'Table Style Medium 2',
+                        'columns': [{'header': field.replace('_', ' ').title()} for field in fields]})
+        for row_index, row in enumerate(rows, 1):
+            for column, field in enumerate(fields):
+                value = row[field]
+                if value is None:
+                    continue
+                if isinstance(value, bool):
+                    sheet.write_boolean(row_index, column, value)
+                elif isinstance(value, (int, float)):
+                    sheet.write_number(row_index, column, value)
+                else:
+                    sheet.write_string(row_index, column, str(value), literal)
+        sheet.set_column(0, len(fields)-1, 23)
+        sheet.set_row(0, 32)
+        sheet.freeze_panes(1, 1)
 
 
 def write_excel(path: Path, rows, summary):
     xlsxwriter = require_xlsxwriter()
     temporary = path.with_name('.' + path.name + '.tmp')
+    if not rows and summary.get('account_risk'):
+        with xlsxwriter.Workbook(temporary, {'strings_to_formulas': False, 'strings_to_urls': False}) as book:
+            book.set_properties({'title': summary['product_name'], 'author': 'perp'})
+            write_account_sheets(book, summary['account_risk'])
+        temporary.replace(path)
+        return
     with xlsxwriter.Workbook(temporary, {'strings_to_formulas': False, 'strings_to_urls': False, 'strings_to_numbers': False}) as book:
         book.set_properties({'title': summary['product_name'], 'author': 'perp', 'comments': 'Local recovered-password analysis'})
         header = book.add_format({'bold': True, 'bg_color': '#087966', 'font_color': '#ffffff', 'text_wrap': True, 'valign': 'vcenter'})
@@ -151,4 +232,6 @@ def write_excel(path: Path, rows, summary):
             sheet.set_row(0, 32)
             sheet.set_landscape()
             sheet.fit_to_pages(1, 0)
+        if summary.get('account_risk'):
+            write_account_sheets(book, summary['account_risk'])
     temporary.replace(path)

@@ -1,0 +1,336 @@
+{
+  "schema": "perp.attackforge.bundle.v1",
+  "tool": "perp",
+  "version": "1.1",
+  "created": "2026-11-25T12:00:00+00:00",
+  "publication_status": "requires_consultant_review",
+  "metrics": {
+    "total_records": 5,
+    "unique_passwords": 5,
+    "duplicate_records": 0,
+    "empty_passwords": 0,
+    "account_mappings": 7,
+    "inventory_current_accounts": 7,
+    "enabled_current_passwords_known": 3
+  },
+  "sources": [
+    {
+      "id": "source-001",
+      "format": "hashcat",
+      "sha256": "b48a90d4e93b9063bb166ee79a40256abd5a198bd6056d8f1a03753c4ccd8cb1",
+      "records": 5
+    },
+    {
+      "id": "inventory-001",
+      "format": "ntds-text",
+      "sha256": "eefee953c92aca6364cbb3c3fd689435c89df18b059bb167e9d23af7341482df",
+      "records": 11
+    },
+    {
+      "id": "directory-context",
+      "format": "directory-csv",
+      "sha256": "93011f18475efb268f4940e45d0aa73386abbbbae94d92489cbd38f81e22a061",
+      "records": 5
+    }
+  ],
+  "findings": [
+    {
+      "external_id": "perp:enabled-credentials",
+      "title": "Recovered current passwords on enabled accounts",
+      "severity_suggestion": "High",
+      "description": "Offline verification identifies current NT passwords for accounts marked enabled in the supplied inventory.",
+      "impact": "Known credentials may expose accounts where access policy permits their use; no live authentication was tested.",
+      "remediation": "Validate current status, coordinate credential rotation, review reuse and sign-in activity, and apply appropriate access controls.",
+      "references": [],
+      "affected_accounts": [
+        {
+          "account": "EXAMPLE.TEST\\lab-admin",
+          "asset": "example-directory",
+          "status": "Enabled",
+          "hash_type": "NTLM",
+          "privileged": true,
+          "service_account": false,
+          "current_nt_recovered": true,
+          "lm_storage_confirmed": false,
+          "inventory_record_refs": [
+            {
+              "source_id": "inventory-001",
+              "line": 1
+            }
+          ],
+          "snapshot_time": "2026-11-25T12:00:00+00:00"
+        },
+        {
+          "account": "EXAMPLE.TEST\\app-service",
+          "asset": "example-app",
+          "status": "Enabled",
+          "hash_type": "NTLM",
+          "privileged": false,
+          "service_account": true,
+          "current_nt_recovered": true,
+          "lm_storage_confirmed": false,
+          "inventory_record_refs": [
+            {
+              "source_id": "inventory-001",
+              "line": 2
+            }
+          ],
+          "snapshot_time": "2026-11-25T12:00:00+00:00"
+        },
+        {
+          "account": "EXAMPLE.TEST\\current-user",
+          "asset": "example-directory",
+          "status": "Enabled",
+          "hash_type": "NTLM",
+          "privileged": false,
+          "service_account": false,
+          "current_nt_recovered": true,
+          "lm_storage_confirmed": false,
+          "inventory_record_refs": [
+            {
+              "source_id": "inventory-001",
+              "line": 4
+            }
+          ],
+          "snapshot_time": "2026-11-25T12:00:00+00:00"
+        }
+      ],
+      "affected_assets": [
+        "example-app",
+        "example-directory"
+      ],
+      "evidence_refs": [
+        "aggregate-summary"
+      ],
+      "review_required": true
+    },
+    {
+      "external_id": "perp:cross-status-reuse",
+      "title": "Shared credentials across enabled and disabled accounts",
+      "severity_suggestion": "High",
+      "description": "Identical current NT hashes occur on enabled and disabled inventory accounts.",
+      "impact": "Exposure of a disabled account credential can expose an enabled account sharing its credential material.",
+      "remediation": "Remove credential reuse, coordinate rotation of affected enabled credentials, and review account lifecycle controls.",
+      "references": [],
+      "affected_accounts": [
+        {
+          "account": "EXAMPLE.TEST\\app-service",
+          "asset": "example-app",
+          "status": "Enabled",
+          "hash_type": "NTLM",
+          "privileged": false,
+          "service_account": true,
+          "current_nt_recovered": true,
+          "lm_storage_confirmed": false,
+          "inventory_record_refs": [
+            {
+              "source_id": "inventory-001",
+              "line": 2
+            }
+          ],
+          "snapshot_time": "2026-11-25T12:00:00+00:00"
+        },
+        {
+          "account": "EXAMPLE.TEST\\retired-user",
+          "asset": "example-directory",
+          "status": "Disabled",
+          "hash_type": "NTLM",
+          "privileged": false,
+          "service_account": false,
+          "current_nt_recovered": true,
+          "lm_storage_confirmed": true,
+          "inventory_record_refs": [
+            {
+              "source_id": "inventory-001",
+              "line": 3
+            }
+          ],
+          "snapshot_time": "2026-11-25T12:00:00+00:00"
+        }
+      ],
+      "affected_assets": [
+        "example-app",
+        "example-directory"
+      ],
+      "evidence_refs": [
+        "aggregate-summary"
+      ],
+      "review_required": true
+    },
+    {
+      "external_id": "perp:history-current-reuse",
+      "title": "Historical credentials reused by enabled accounts",
+      "severity_suggestion": "High",
+      "description": "Historical NT material matches a current NT hash on an enabled account; own-current history overlaps are excluded.",
+      "impact": "Exposure of password history can expose current credentials on other accounts.",
+      "remediation": "Coordinate replacement of reused credentials, review cross-account reuse, and protect historical directory credential material.",
+      "references": [],
+      "affected_accounts": [
+        {
+          "account": "EXAMPLE.TEST\\current-user",
+          "asset": "example-directory",
+          "status": "Enabled",
+          "hash_type": "NTLM",
+          "privileged": false,
+          "service_account": false,
+          "current_nt_recovered": true,
+          "lm_storage_confirmed": false,
+          "inventory_record_refs": [
+            {
+              "source_id": "inventory-001",
+              "line": 4
+            }
+          ],
+          "snapshot_time": "2026-11-25T12:00:00+00:00"
+        }
+      ],
+      "affected_assets": [
+        "example-directory"
+      ],
+      "evidence_refs": [
+        "aggregate-summary"
+      ],
+      "review_required": true
+    },
+    {
+      "external_id": "perp:lm-storage",
+      "title": "Active LAN Manager password hash storage",
+      "severity_suggestion": "Medium",
+      "description": "Supplied account context or typed inventory identifies non-placeholder LM password hash storage.",
+      "impact": "LM password representations can make offline recovery substantially easier after hash exposure.",
+      "remediation": "Enable the applicable Network security: Do not store LAN Manager hash value on next password change policy. Validate legacy compatibility, coordinate password changes to remove stored LM representations, and verify removal after policy application and replication.",
+      "references": [
+        "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/network-security-do-not-store-lan-manager-hash-value-on-next-password-change"
+      ],
+      "affected_accounts": [
+        {
+          "account": "EXAMPLE.TEST\\retired-user",
+          "asset": "example-directory",
+          "status": "Disabled",
+          "hash_type": "NTLM",
+          "privileged": false,
+          "service_account": false,
+          "current_nt_recovered": true,
+          "lm_storage_confirmed": true,
+          "inventory_record_refs": [
+            {
+              "source_id": "inventory-001",
+              "line": 3
+            }
+          ],
+          "snapshot_time": "2026-11-25T12:00:00+00:00"
+        }
+      ],
+      "affected_assets": [
+        "example-directory"
+      ],
+      "evidence_refs": [
+        "aggregate-summary"
+      ],
+      "review_required": true
+    },
+    {
+      "external_id": "perp:privileged-passwords",
+      "title": "Recoverable privileged-account passwords",
+      "severity_suggestion": "High",
+      "description": "Passwords were recovered for accounts whose privileged role was confirmed in the supplied account context.",
+      "impact": "An exposed privileged credential may permit elevated access where that credential remains valid; unauthorized use was not tested by this export.",
+      "remediation": "Coordinate rotation of exposed privileged credentials. Review reuse and relevant sign-in activity, separate privileged and ordinary credentials, and enforce appropriate MFA and privileged-access controls.",
+      "references": [],
+      "affected_accounts": [
+        {
+          "account": "EXAMPLE.TEST\\lab-admin",
+          "asset": "example-directory",
+          "status": "Enabled",
+          "hash_type": "NTLM",
+          "privileged": true,
+          "service_account": false,
+          "current_nt_recovered": true,
+          "lm_storage_confirmed": false,
+          "inventory_record_refs": [
+            {
+              "source_id": "inventory-001",
+              "line": 1
+            }
+          ],
+          "snapshot_time": "2026-11-25T12:00:00+00:00"
+        }
+      ],
+      "affected_assets": [
+        "example-directory"
+      ],
+      "evidence_refs": [
+        "aggregate-summary"
+      ],
+      "review_required": true
+    },
+    {
+      "external_id": "perp:service-passwords",
+      "title": "Recoverable service-account passwords",
+      "severity_suggestion": "Medium",
+      "description": "Passwords were recovered for accounts whose service-account role was confirmed in the supplied account context.",
+      "impact": "An exposed service credential may provide access through dependent services, tasks, or applications.",
+      "remediation": "Coordinate credential rotation with service owners and update every dependent service, scheduled task, and secret store. Prefer managed service accounts or managed identities where supported, and restrict permissions to required functions.",
+      "references": [],
+      "affected_accounts": [
+        {
+          "account": "EXAMPLE.TEST\\app-service",
+          "asset": "example-app",
+          "status": "Enabled",
+          "hash_type": "NTLM",
+          "privileged": false,
+          "service_account": true,
+          "current_nt_recovered": true,
+          "lm_storage_confirmed": false,
+          "inventory_record_refs": [
+            {
+              "source_id": "inventory-001",
+              "line": 2
+            }
+          ],
+          "snapshot_time": "2026-11-25T12:00:00+00:00"
+        }
+      ],
+      "affected_assets": [
+        "example-app"
+      ],
+      "evidence_refs": [
+        "aggregate-summary"
+      ],
+      "review_required": true
+    }
+  ],
+  "review_checks": [
+    {
+      "account": "EXAMPLE.TEST\\unclassified",
+      "asset": "",
+      "reason": "Map to an in-scope AttackForge asset before publication"
+    },
+    {
+      "account": "EXAMPLE.TEST\\empty-disabled",
+      "asset": "",
+      "reason": "Map to an in-scope AttackForge asset before publication"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "aggregate-summary",
+      "path": "evidence/summary.svg",
+      "mime_type": "image/svg+xml",
+      "kind": "generated_aggregate_graphic",
+      "sha256": "6038c2d85cab998d8e470af4da1cfde9253fe827dac6be39ef305372ecd2b674",
+      "content_review_required": false
+    }
+  ],
+  "privacy": {
+    "password_fields_omitted": true,
+    "supplied_images_require_review": true
+  },
+  "limitations": [
+    "Input records are not unique accounts or an account crack rate.",
+    "No privilege, service role, or hash type is inferred from password values.",
+    "This is a portable review bundle, not an AttackForge-native import schema.",
+    "Status and roles describe supplied context; no live login was tested. Inventory findings may overlap and require review."
+  ],
+  "bundle_id": "69dc5adfd4ed016b5c934984ab68d9aaa784901c286fa7291da041a782013425"
+}

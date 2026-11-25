@@ -45,4 +45,24 @@ assert.equal(a.legends[0].focused,true);
 a.slices[1].handlers.pointerenter(); assert.match(a.detail.textContent,/B · 70 records/);
 assert.equal(b.slices[0].attributes['stroke-dasharray'],'100 0');
 assert.equal(empty.total.textContent,'0'); assert.match(empty.detail.textContent,/No visible categories/);
-console.log('Donut percentages, hidden/all-hidden states, reset focus, hover, keyboard focus, single-category and empty states passed.');
+const helpHandlers = {}, triggerHandlers = {}, documentHandlers = {};
+const trigger = {addEventListener:(name,callback)=>triggerHandlers[name]=callback};
+const panel = {};
+const help = {open:false, querySelector:()=>trigger,
+  contains:target=>[help,trigger,panel].includes(target),
+  addEventListener:(name,callback)=>helpHandlers[name]=callback};
+vm.runInNewContext(script,{document:{querySelectorAll:()=>[],getElementById:()=>help,
+  addEventListener:(name,callback)=>documentHandlers[name]=callback}});
+helpHandlers.pointerenter({pointerType:'mouse'});assert.equal(help.open,true);
+helpHandlers.pointerleave();assert.equal(help.open,false);
+helpHandlers.focusin();assert.equal(help.open,true);
+triggerHandlers.click({preventDefault(){}});assert.equal(help.open,true);
+helpHandlers.pointerleave();assert.equal(help.open,true);
+documentHandlers.keydown({key:'Escape'});assert.equal(help.open,false);
+helpHandlers.focusout({relatedTarget:null});
+helpHandlers.pointerenter({pointerType:'touch'});assert.equal(help.open,false);
+triggerHandlers.click({preventDefault(){}});assert.equal(help.open,true);
+documentHandlers.pointerdown({target:panel});assert.equal(help.open,true);
+documentHandlers.pointerdown({target:{}});assert.equal(help.open,false);
+helpHandlers.focusin();helpHandlers.focusout({relatedTarget:null});assert.equal(help.open,false);
+console.log('Donut interactions and mask-key hover, focus, touch, Escape, pinning, and outside dismissal passed.');
